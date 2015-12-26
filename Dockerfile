@@ -1,3 +1,6 @@
+# based on
+# https://developer.ibm.com/swift/2015/12/15/running-swift-within-docker/
+
 FROM ubuntu:15.10
 
 # Latest Swift Version
@@ -30,6 +33,5 @@ RUN SWIFT_ARCHIVE_NAME=swift-$SWIFT_VERSION-$SWIFT_PLATFORM && \
 #Building a webserver? Expose Port 80 by uncommenting the following.
 #Expose 80
 
-# VOLUME ./swift /swift
-#Copy our sample swift program into the Docker image
+# VOLUME ./ /Fly
 COPY ./ /Fly
