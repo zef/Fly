@@ -89,10 +89,31 @@ enum HTTPStatus: Int {
 
 
 // config values
-// add custom(String) case and equality checking for that
 enum Environment {
-    case Production, Development
+    case Production, Development, custom(String)
+
+    var string: String {
+        switch self  {
+        case .Production:
+            return "Production"
+        case .Development:
+            return "Development"
+        case .custom(let string):
+            return string
+        }
+    }
 }
+
+// looks like this will be automatic in a later version of Swift
+func ==(lhs: Environment, rhs: Environment) -> Bool {
+    return lhs.string == rhs.string
+}
+
+let env = Environment.custom("staging")
+
+env == Environment.Production
+env == Environment.Development
+env == Environment.custom("staging")
 
 
 
