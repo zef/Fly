@@ -170,11 +170,31 @@ struct FlyResponse {
     init(status: HTTPStatus) {
         self.status = status
     }
+    init(body: String) {
+        self.body = body
+    }
 
     var tuple: (status: HTTPStatus, body: String) {
         return (status, body)
     }
 }
+
+extension FlyResponse: StringLiteralConvertible {
+    typealias UnicodeScalarLiteralType = StringLiteralType
+    init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
+        self.init(stringLiteral: value)
+    }
+
+    typealias ExtendedGraphemeClusterLiteralType = StringLiteralType
+    init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
+        self.init(stringLiteral: value)
+    }
+
+    init(stringLiteral value: StringLiteralType) {
+        self.init(body: value)
+    }
+}
+
 
 
 typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
@@ -253,9 +273,7 @@ app.router.route("/") { request, response in
 
 // not sure I like this:
 app.router.GET("/welcome") { request, response in
-    var response = response
-    response.body = "Welcome to our web page"
-    return response
+    return "Welcome to our web page"
 }
 
 //app.router.route("/welcome", method: .GET) { request in
@@ -265,9 +283,7 @@ app.router.GET("/welcome") { request, response in
 //}
 
 app.router.route("/welcome", method: .POST) { request, response in
-    var response = response
-    response.body = "Why are you posting to /welcome?"
-    return response
+    return "Why are you posting to /welcome?"
 }
 
 app.router.route("/users/new", method: .POST, action: UserController.createUser)
