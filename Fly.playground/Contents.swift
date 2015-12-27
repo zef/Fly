@@ -116,7 +116,6 @@ env == Environment.Development
 env == Environment.custom("staging")
 
 
-
 // FlyConfig
 protocol FlyConfig {
     var environment: Environment { get }
@@ -127,17 +126,17 @@ extension FlyConfig {
 }
 
 // FlyApp
-//protocol FlyApp: class {
-//    var config: FlyConfig { get set }
-//
-//    init(config: FlyConfig)
-//}
+protocol FlyApp: class {
+    var config: FlyConfig { get set }
+    var router: FlyRouter { get }
+    init(config: FlyConfig)
+}
 
-class FlyApp {
+class App: FlyApp {
     var config: FlyConfig
     var router = FlyRouter()
 
-    init(config: FlyConfig) {
+    required init(config: FlyConfig) {
         self.config = config
     }
 
@@ -246,8 +245,47 @@ struct Config: FlyConfig {
 }
 
 
-class UserController {
+protocol Routable {
+    static var method: HTTPMethod { get }
+    static var path: String { get }
+    static var actions: [Routable.Type] { get }
+}
 
+extension Routable {
+    static var method: HTTPMethod { return .GET }
+    static var actions: [Routable.Type] { return [] }
+
+    static func matchesPath(path: String) -> Bool {
+        return self.path.containsString(path)
+    }
+}
+
+class SomeController: Routable {
+    static var path = "posts"
+    static var actions: [Routable.Type] = [New.self, Create.self]
+
+    class New: Routable {
+        static var path = "new"
+    }
+    class Create: Routable {
+        static var path = "create"
+        static var method = HTTPMethod.POST
+    }
+}
+
+SomeController.path
+SomeController.Create.path
+
+//let test = [SomeController.self].flatMap { $0 as? Routable.Type }
+//test
+
+//let mirror = Mirror(reflecting: SomeController.self)
+//mirror.children
+
+SomeController.matchesPath("/posts/:id/create")
+
+
+class UserController {
     class func createUser(request: FlyRequest, response: FlyResponse) -> FlyResponse {
         var response = response
         response.body = "Creating a new user!"
@@ -256,13 +294,10 @@ class UserController {
 
 }
 
-//class App: FlyApp {
-//
-//}
-
-let app = FlyApp(config: Config())
+let app = App(config: Config())
 
 app.environment
+
 
 app.router.route("/") { request, response in
     var response = response
@@ -298,5 +333,4 @@ app.router.handle(FlyRequest(path: "/users/new", method: .POST)).tuple
 
 
 print(app.router.friendlyRouteList)
-
 
