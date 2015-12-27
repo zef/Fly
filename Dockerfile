@@ -32,9 +32,17 @@ RUN SWIFT_ARCHIVE_NAME=swift-$SWIFT_VERSION-$SWIFT_PLATFORM && \
     tar -xvzf $SWIFT_ARCHIVE_NAME.tar.gz -C / --strip 1 && \
     rm -rf $SWIFT_ARCHIVE_NAME* /tmp/* /var/tmp/*
 
+
+# For https://github.com/Zewo/Epoch
+RUN apt-get install -y software-properties-common
+RUN apt-get update && add-apt-repository 'deb [trusted=yes] http://apt.zewo.io/deb ./' | tee --append /etc/apt/sources.list
+RUN apt-get update && apt-get install -y --force-yes uri-parser http-parser libvenice
+
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+
 #Building a webserver? Expose Port 80 by uncommenting the following.
-#Expose 80
+Expose 8080
 
 # VOLUME ./ /Fly
 COPY ./ /Fly
