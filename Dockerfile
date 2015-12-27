@@ -1,21 +1,23 @@
 # based on
 # https://developer.ibm.com/swift/2015/12/15/running-swift-within-docker/
+#
+# Modifications:
+# added git
+# copy dir of files
 
 FROM ubuntu:15.10
 
 # Latest Swift Version
 ENV SWIFT_VERSION 2.2-SNAPSHOT-2015-12-01-b
 ENV SWIFT_PLATFORM ubuntu15.10
-
 # Install Dependencies
 RUN apt-get update && \
     apt-get install -y \
+        git \
         clang \
         libicu55 \
         libpython2.7 \
-        wget && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+        wget
 
 # Install Swift keys
 RUN wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import - && \
@@ -30,8 +32,14 @@ RUN SWIFT_ARCHIVE_NAME=swift-$SWIFT_VERSION-$SWIFT_PLATFORM && \
     tar -xvzf $SWIFT_ARCHIVE_NAME.tar.gz -C / --strip 1 && \
     rm -rf $SWIFT_ARCHIVE_NAME* /tmp/* /var/tmp/*
 
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 #Building a webserver? Expose Port 80 by uncommenting the following.
 #Expose 80
 
 # VOLUME ./ /Fly
 COPY ./ /Fly
+
+WORKDIR /Fly
+RUN swift build
+
+ENTRYPOINT .build/debug/Fly
