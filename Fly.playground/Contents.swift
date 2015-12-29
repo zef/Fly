@@ -104,7 +104,7 @@ enum Environment {
     }
 }
 
-// looks like this will be automatic in a later version of Swift
+// looks like this will be automatic in a later version of Swift based on a proposal
 func ==(lhs: Environment, rhs: Environment) -> Bool {
     return lhs.string == rhs.string
 }
@@ -194,23 +194,20 @@ extension FlyResponse: StringLiteralConvertible {
     }
 }
 
-
-
-typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
-
 // would be cool to be able to nest routers
 // maybe even have a pattern where a controller defines a router, and then nests it at a mount point?
 // that would make refactoring routes really easy
+// not sure if it's better to generate flat routes as they are added somehow,
+// or to have a nested scheme where the nesting is calculated at matching time...
 struct FlyRouter {
-    var routes = [FlyRoute]()
 
-    mutating func GET(path: String, action: FlyAction) {
-        self.route(path, method: .GET, action: action)
+    var routes = [Routable]()
+
+    mutating func register(routes: Routable...) {
+        register(routes)
     }
-
-    mutating func route(path: String, method: HTTPMethod = .GET, action: FlyAction) {
-        let route = FlyRoute(path: path, method: method, action: action)
-        routes.append(route)
+    mutating func register(routes: [Routable]...) {
+        self.routes.appendContentsOf(routes.flatMap{$0})
     }
 
     func handle(request: FlyRequest) -> FlyResponse {
@@ -221,11 +218,13 @@ struct FlyRouter {
     }
 
     // if path matches but not method, could suggest that to warn the dev about the potential problem
-    func matchingRoute(request: FlyRequest) -> FlyRoute? {
-        return routes.filter { route in
-            request.method == route.method &&
-            request.path == route.path
-        }.first
+    func matchingRoute(request: FlyRequest) -> Routable? {
+        for route in routes {
+            if route.matches(request) {
+                return route
+            }
+        }
+        return nil
     }
 
     var friendlyRouteList: String {
@@ -234,56 +233,128 @@ struct FlyRouter {
     }
 }
 
-struct FlyRoute {
-    let path: String
-    let method: HTTPMethod
-    let action: FlyAction
+extension FlyRouter {
+    struct Route: Routable {
+        let path: String
+        let method: HTTPMethod
+        let action: FlyAction
+    }
+
+    mutating func route(path: String, method: HTTPMethod = .GET, action: FlyAction) {
+        let route = Route(path: path, method: method, action: action)
+        register(route)
+    }
+
+    mutating func GET(path: String, action: FlyAction) {
+        self.route(path, method: .GET, action: action)
+    }
 }
 
-struct Config: FlyConfig {
-    var environment = Environment.Development
+typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
+
+protocol RoutableNamepsace {
+    var path: String { get }
+    var routes: [Routable] { get }
 }
 
-
-protocol Routable {
-    static var method: HTTPMethod { get }
-    static var path: String { get }
-    static var actions: [Routable.Type] { get }
-}
-
-extension Routable {
-    static var method: HTTPMethod { return .GET }
-    static var actions: [Routable.Type] { return [] }
-
-    static func matchesPath(path: String) -> Bool {
+extension RoutableNamepsace {
+    func matchesPath(path: String) -> Bool {
         return self.path.containsString(path)
     }
 }
 
-class SomeController: Routable {
-    static var path = "posts"
-    static var actions: [Routable.Type] = [New.self, Create.self]
+protocol Routable {
+    var path: String { get }
+    var action: FlyAction { get }
 
-    class New: Routable {
-        static var path = "new"
+    // default implementation returns .GET
+    var method: HTTPMethod { get }
+}
+
+extension Routable {
+    var method: HTTPMethod { return .GET }
+//    var actions: [Routable.Type] { return [] }
+
+    func matchesPath(path: String) -> Bool {
+        return self.path == path
     }
-    class Create: Routable {
-        static var path = "create"
-        static var method = HTTPMethod.POST
+
+    func matches(request: FlyRequest) -> Bool {
+        return method == request.method && matchesPath(request.path)
     }
 }
 
-SomeController.path
-SomeController.Create.path
 
-//let test = [SomeController.self].flatMap { $0 as? Routable.Type }
-//test
+enum Route {
+    case showUser(Int)
+    case editUser(Int)
+
+    static var cases: [Any] {
+        return [showUser, editUser]
+    }
+
+    static var caseTemplates: [Route] {
+        return cases.flatMap { route in
+            switch route {
+            case let route as Route:
+                return route
+            case let route as (Int) -> Route:
+                return route(123)
+            default:
+                return nil
+            }
+        }
+    }
+
+    var url: String {
+        switch self {
+        case .showUser:
+            return "/users/:id/show"
+        case .editUser:
+            return "/users/:id/edit"
+        }
+    }
+}
+
+let templates = Route.caseTemplates.map { $0.url }
+templates
+
+let show = Route.showUser(24)
+show.url
+
+
+struct BaseRoute: Routable {
+//    var method = HTTPMethod.GET
+    var path: String
+    var action: FlyAction
+
+    init(_ path: String, action: FlyAction) {
+        self.path = path
+        self.action = action
+    }
+}
+
+
+class SomeController: RoutableNamepsace {
+    var path = "posts"
+    var routes: [Routable] = [
+        BaseRoute("whatever") { request, response in
+            return "yes, whatever"
+        },
+        BaseRoute("thingy/:id/okay") { request, response in
+            return "thingy thing thing"
+        }
+    ]
+    var routeTypes = [Routable.Type]()
+}
 
 //let mirror = Mirror(reflecting: SomeController.self)
 //mirror.children
 
-SomeController.matchesPath("/posts/:id/create")
 
+struct Config: FlyConfig {
+    var environment = Environment.Development
+}
 
 class UserController {
     class func createUser(request: FlyRequest, response: FlyResponse) -> FlyResponse {
@@ -291,13 +362,21 @@ class UserController {
         response.body = "Creating a new user!"
         return response
     }
-
 }
 
 let app = App(config: Config())
 
-app.environment
+let route = FlyRouter.Route(path: "/test", method: .GET) { request, response in
+    return "Tested."
+}
 
+app.router.register(route, route, route)
+
+app.router.register(
+    SomeController().routes,
+    SomeController().routes,
+    SomeController().routes
+)
 
 app.router.route("/") { request, response in
     var response = response
@@ -306,31 +385,22 @@ app.router.route("/") { request, response in
     return response
 }
 
-// not sure I like this:
+// not sure I like the .GET/.POST stuff:
 app.router.GET("/welcome") { request, response in
     return "Welcome to our web page"
 }
-
-//app.router.route("/welcome", method: .GET) { request in
-//    var response = FlyResponse(status: .OK)
-//    response.body = "Welcome to our web page"
-//    return response
-//}
 
 app.router.route("/welcome", method: .POST) { request, response in
     return "Why are you posting to /welcome?"
 }
 
-app.router.route("/users/new", method: .POST, action: UserController.createUser)
-
+app.router.route("/users/:id/create", method: .POST, action: UserController.createUser)
 
 app.router.handle(FlyRequest(path: "/")).tuple
 app.router.handle(FlyRequest(path: "/", method: .POST)).tuple
 app.router.handle(FlyRequest(path: "/welcome")).tuple
 app.router.handle(FlyRequest(path: "/welcome", method: .POST)).tuple
-app.router.handle(FlyRequest(path: "/suck")).tuple
 app.router.handle(FlyRequest(path: "/users/new", method: .POST)).tuple
-
 
 print(app.router.friendlyRouteList)
 
