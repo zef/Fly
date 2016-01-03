@@ -5,34 +5,51 @@ enum TagType {
     // like Br vs Break, and also Link. I kinda prefer the more human-readable versions, but they
     // also require more learning and abstraction since they're a departure from the standard.
     case HTML, Head, Body
+
+    case H1, H2, H3, H4, H5, H6
+    case Header, Footer, Section, Article, Nav
+
     case Div, Span
     case Br, Break
-    case Link(to: String)
+    case Hr
     case Ul, Li
-    case Img(src: String)
+
+    case a(to: String)
+    case anchor(to: String)
+    case link(to: String)
+    case img(src: String)
 
     var tagName: String {
         switch self {
-        case .HTML:
-            return "html"
-        case .Head:
-            return "head"
-        case .Body:
-            return "body"
-        case .Div:
-            return "div"
-        case .Br, .Break:
-            return "br"
-        case .Span:
-            return "span"
-        case .Link:
-            return "a"
-        case .Ul:
-            return "ul"
-        case .Li:
-            return "li"
-        case .Img:
-            return "img"
+        case .HTML: return "html"
+        case .Head: return "head"
+        case .Body: return "body"
+
+        case .Header: return "header"
+        case .Footer: return "footer"
+        case .Section: return "section"
+        case .Article: return "article"
+        case .Nav: return "nav"
+
+
+        case .Div: return "div"
+        case .Span: return "span"
+        case .Ul: return "ul"
+        case .Li: return "li"
+
+        case .H1: return "h1"
+        case .H2: return "h2"
+        case .H3: return "h3"
+        case .H4: return "h4"
+        case .H5: return "h5"
+        case .H6: return "h6"
+
+        case .Br, .Break: return "br"
+        case .Hr: return "hr"
+
+        case .a, .anchor: return "a"
+        case .img: return "img"
+        case .link: return "link"
         }
     }
 
@@ -46,9 +63,13 @@ enum TagType {
         var attributes = HTMLAttributes()
 
         switch self {
-        case .Link(let href):
+        case .a(let href):
             attributes["href"] = href
-        case .Img(let src):
+        case .anchor(let href):
+            attributes["href"] = href
+        case .link(let href):
+            attributes["href"] = href
+        case .img(let src):
             attributes["src"] = src
         default:
             break
@@ -118,19 +139,19 @@ struct Tag: HTMLTag {
 
 struct HTML5: HTMLTag {
     var tag: Tag
+    let doctype = "<!DOCTYPE html>"
 
     init(_ tags: [HTMLTag]) {
         let content = tags.map { $0.htmlString }.joinWithSeparator("")
 
         self.tag = Tag(.HTML, htmlTags: [
             Tag(.Head, ""),
-            // Tag(.Body, tags.htmlString),
             Tag(.Body, content),
         ])
     }
 
     var htmlString: String {
-        return tag.htmlString
+        return doctype + tag.htmlString
     }
 }
 // would be really tedious to implement a bunch of these... maybe autogenerate them based on attributes?
@@ -138,10 +159,10 @@ struct Link: HTMLTag {
     var tag: Tag
 
     init(_ location: String, attributes: HTMLAttributes = HTMLAttributes(), _ content: String = "") {
-        self.tag = Tag(.Link(to: location), attributes: attributes, content)
+        self.tag = Tag(.anchor(to: location), attributes: attributes, content)
     }
     init(_ location: String, _ content: String = "") {
-        self.tag = Tag(.Link(to: location), content)
+        self.tag = Tag(.anchor(to: location), content)
     }
 
     var htmlString: String {

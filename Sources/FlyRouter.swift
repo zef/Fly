@@ -71,8 +71,7 @@ extension FlyRouter {
             return Tag(.Li, "\(route.method) \(path)")
         }
         let template = HTML5([
-            Tag(.Div, "Route not found, how about one of these?"),
-            Tag(.Break),
+            Tag(.H2, "Route not found, how about one of these?"),
             Tag(.Ul, htmlTags: list),
         ])
         return template.htmlString
