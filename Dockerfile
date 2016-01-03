@@ -44,10 +44,9 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 #Building a webserver? Expose Port 80 by uncommenting the following.
 Expose 8080
 
-# VOLUME ./ /Fly
-COPY ./ /Fly
+# COPY ./ /Fly
 
 WORKDIR /Fly
-RUN swift build
+# RUN swift build
 
-ENTRYPOINT .build/debug/Fly
+# ENTRYPOINT .build/debug/Fly
