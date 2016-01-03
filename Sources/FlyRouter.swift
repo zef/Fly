@@ -8,6 +8,11 @@ typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
 struct FlyRouter {
 
     var routes = [Routable]()
+    var debug = false
+
+    init(debug: Bool) {
+        self.debug = debug
+    }
 
     mutating func register(routes: Routable...) {
         register(routes)
@@ -30,7 +35,22 @@ struct FlyRouter {
                 return route
             }
         }
-        return nil
+        if debug {
+            return debugRoute
+        } else {
+            return nil
+        }
+    }
+
+    var debugRoute: Route {
+        return Route(path: "/routes", method: .GET, action: debugAction)
+    }
+
+    var debugAction: FlyAction {
+        return { request, response in
+            let body = "Route not found, how about one of these?\n\n\(self.friendlyRouteList)"
+            return FlyResponse(body: body)
+        }
     }
 
     var friendlyRouteList: String {

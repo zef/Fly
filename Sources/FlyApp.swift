@@ -11,10 +11,11 @@ extension FlyApp {
 
 class App: FlyApp {
     var config: FlyConfig
-    var router = FlyRouter()
+    var router: FlyRouter
 
     required init(config: FlyConfig) {
         self.config = config
+        self.router = FlyRouter(debug: config.showDebugRoutes)
         setup()
     }
 
