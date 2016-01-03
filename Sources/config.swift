@@ -22,9 +22,11 @@ func ==(lhs: Environment, rhs: Environment) -> Bool {
 // FlyConfig
 protocol FlyConfig {
     var environment: Environment { get }
+    var showDebugRoutes: Bool { get }
 }
 
 extension FlyConfig {
     var environment: Environment { return .Production }
+    var showDebugRoutes: Bool { return environment == Environment.Development }
 }
 

@@ -48,14 +48,34 @@ struct FlyRouter {
 
     var debugAction: FlyAction {
         return { request, response in
-            let body = "Route not found, how about one of these?\n\n\(self.friendlyRouteList)"
-            return FlyResponse(body: body)
+            var response = FlyResponse(status: .NotFound)
+            response.body = self.HTMLRouteList
+            return response
         }
     }
 
     var friendlyRouteList: String {
         let list = routes.map { return "\($0.method) \($0.path)" }
         return list.joinWithSeparator("\n")
+    }
+}
+
+extension FlyRouter {
+    var HTMLRouteList: String {
+        // don't want to have to put [HTMLTag] here, would be nice to make that better
+        let list: [HTMLTag] = routes.map { route in
+            var path = route.path
+            if route.method == .GET {
+                path = Link(route.path, route.path).htmlString
+            }
+            return Tag(.Li, "\(route.method) \(path)")
+        }
+        let template = HTML5([
+            Tag(.Div, "Route not found, how about one of these?"),
+            Tag(.Break),
+            Tag(.Ul, htmlTags: list),
+        ])
+        return template.htmlString
     }
 }
 

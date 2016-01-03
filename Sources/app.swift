@@ -31,7 +31,5 @@ extension App {
         router.route("/welcome", method: .POST) { request, response in
             return "Why are you posting to /welcome?"
         }
-
-        print("route list:", router.friendlyRouteList)
     }
 }
