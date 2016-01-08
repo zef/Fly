@@ -25,10 +25,14 @@ struct EpochBridge: ResponderType {
     func respond(request: Request) -> Response {
         let flyRequest = FlyRequest(request.uri.description)
         let (status, body) = app.router.handle(flyRequest).tuple
-        let responseBody = body
-        // if status == .NotFound {
-        //     responseBody = "Page not found"
-        // }
+        var responseBody = body
+        if status == .NotFound {
+            if app.config.showDebugRoutes {
+                responseBody = app.router.HTMLRouteList
+            } else {
+                responseBody = "Page not Found"
+            }
+        }
         print("received request:", request.uri.description, "-> \(status)")
         return Response(status: Status(statusCode: status.rawValue), body: responseBody)
     }
