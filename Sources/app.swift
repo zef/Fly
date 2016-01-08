@@ -19,7 +19,7 @@ extension App {
 
         router.route("/") { request, response in
             var response = response
-            response.body = "Home page!"
+            response.body = HTML5([Tag(.Div, "Home page!")]).htmlString
             return response
         }
 
