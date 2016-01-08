@@ -2,8 +2,9 @@
 
 This is the beginning of some ideas for a Swift web framework intended to be run on linux.
 
-Fly is heavily inspired by Ruby on Rails by nature of my background in Rails
-development. However, it is not a goal to maintain a Rails-like API or structure.
+At the moment the server component is handled by [Zewo's
+Epoch](https://github.com/Zewo/Epoch) library.
+
 
 ## Goals
 
