@@ -22,6 +22,7 @@ func run(command: String) {
 
 enum Command: String {
     case server
+    case clean
     case help
 
     func execute() {
@@ -30,6 +31,8 @@ enum Command: String {
             run("docker rm swift")
             run("docker build -t swift ./")
             run("docker run -p 80:8080 --name swift -it swift /bin/bash")
+        case .clean:
+            run("swift build --clean")
         case .help:
             print("help")
         }
