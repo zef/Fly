@@ -1,90 +1,38 @@
 typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
+extension FlyRequest: Routable {}
 
-// would be cool to be able to nest routers
-// maybe even have a pattern where a controller defines a router, and then nests it at a mount point?
-// that would make refactoring routes really easy
-// not sure if it's better to generate flat routes as they are added somehow,
-// or to have a nested scheme where the nesting is calculated at matching time...
-struct FlyRouter {
+struct HTTPRoute: RequestHandler, HTTPRoutable, HTMLPrintableRoute {
+    typealias Request = FlyRequest
+    typealias Response = FlyResponse
 
-    var routes = [Routable]()
-    var debug = false
+    let path: String
+    let method: HTTPMethod
+    let action: FlyAction
 
-    init(debug: Bool) {
-        self.debug = debug
+    static var defaultResponse: Response {
+        return FlyResponse(status: .NotFound)
     }
 
-    mutating func register(routes: Routable...) {
-        register(routes)
-    }
-    mutating func register(routes: [Routable]...) {
-        self.routes.appendContentsOf(routes.flatMap{$0})
-    }
-
-    func handle(request: FlyRequest) -> FlyResponse {
-        guard let route = matchingRoute(request) else { return FlyResponse(status: .NotFound) }
-        var response = FlyResponse()
+    func handle(request: Request) -> Response {
+        var response = Response()
         response.request = request
-        return route.action(request, response)
+        return action(request, response)
     }
 
-    // if path matches but not method, could suggest that to warn the dev about the potential problem
-    func matchingRoute(request: FlyRequest) -> Routable? {
-        for route in routes {
-            if route.matches(request) {
-                return route
-            }
+    var htmlString: String {
+        var pathString = path
+        if method == .GET {
+            pathString = Link(path, path).htmlString
         }
-        if debug {
-            return debugRoute
-        } else {
-            return nil
-        }
-    }
-
-    var debugRoute: Route {
-        return Route(path: "/routes", method: .GET, action: debugAction)
-    }
-
-    var debugAction: FlyAction {
-        return { request, response in
-            var response = FlyResponse(status: .NotFound)
-            response.body = self.HTMLRouteList
-            return response
-        }
-    }
-
-    var friendlyRouteList: String {
-        let list = routes.map { return "\($0.method) \($0.path)" }
-        return list.joinWithSeparator("\n")
+        return Tag(.Li, "\(method) \(pathString)").htmlString
     }
 }
 
-extension FlyRouter {
-    var HTMLRouteList: String {
-        // don't want to have to put [HTMLTag] here, would be nice to make that better
-        let list: [HTMLTag] = routes.map { route in
-            var path = route.path
-            if route.method == .GET {
-                path = Link(route.path, route.path).htmlString
-            }
-            return Tag(.Li, "\(route.method) \(path)")
-        }
-        let template = HTML5([
-            Tag(.H2, "Route not found, how about one of these?"),
-            Tag(.Ul, htmlTags: list),
-        ])
-        return template.htmlString
-    }
+protocol HTTPRoutable {
+    init(path: String, method: HTTPMethod, action: FlyAction)
 }
 
-extension FlyRouter {
-    struct Route: Routable {
-        let path: String
-        let method: HTTPMethod
-        let action: FlyAction
-    }
-
+extension FlyRouter where Route: HTTPRoutable {
     mutating func route(path: String, method: HTTPMethod = .GET, action: FlyAction) {
         let route = Route(path: path, method: method, action: action)
         register(route)
@@ -95,24 +43,22 @@ extension FlyRouter {
     }
 }
 
-protocol Routable {
-    var path: String { get }
-    var action: FlyAction { get }
 
-    // default implementation returns .GET
-    var method: HTTPMethod { get }
+protocol HTMLPrintableRoute {
+    var htmlString: String { get }
 }
 
-extension Routable {
-    var method: HTTPMethod { return .GET }
-    //    var actions: [Routable.Type] { return [] }
-
-    func matchesPath(path: String) -> Bool {
-        return self.path == path
-    }
-
-    func matches(request: FlyRequest) -> Bool {
-        return method == request.method && matchesPath(request.path)
+extension FlyRouter where Route: HTMLPrintableRoute {
+    var HTMLRouteList: String {
+        // don't want to have to put [HTMLTag] here, would be nice to make that better
+        let list: [String] = routes.map { route in
+            route.htmlString
+        }
+        let template = HTML5([
+            Tag(.H2, "Route not found, how about one of these?"),
+            Tag(.Ul, list.joinWithSeparator("")),
+        ])
+        return template.htmlString
     }
 }
 

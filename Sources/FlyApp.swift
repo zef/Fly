@@ -1,7 +1,7 @@
 
 protocol FlyApp: class {
     var config: FlyConfig { get set }
-    var router: FlyRouter { get }
+    var router: FlyRouter<HTTPRoute> { get }
     init(config: FlyConfig)
 }
 
@@ -11,11 +11,11 @@ extension FlyApp {
 
 class App: FlyApp {
     var config: FlyConfig
-    var router: FlyRouter
+    var router: FlyRouter<HTTPRoute>
 
     required init(config: FlyConfig) {
         self.config = config
-        self.router = FlyRouter(debug: config.showDebugRoutes)
+        self.router = FlyRouter()
         setup()
     }
 
