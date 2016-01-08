@@ -1,7 +1,5 @@
-import Cocoa
+import Foundation
 
-
-// https://github.com/rhodgkins/SwiftHTTPStatusCodes/blob/master/HTTPStatusCodes.swift#L44
 enum HTTPStatus: Int {
     // Informational
     case Continue = 100
@@ -87,7 +85,6 @@ enum HTTPStatus: Int {
 }
 
 
-
 // config values
 enum Environment {
     case Production, Development, custom(String)
@@ -104,6 +101,8 @@ enum Environment {
     }
 }
 
+extension Environment: Equatable {}
+
 // looks like this will be automatic in a later version of Swift based on a proposal
 func ==(lhs: Environment, rhs: Environment) -> Bool {
     return lhs.string == rhs.string
@@ -119,10 +118,12 @@ env == Environment.custom("staging")
 // FlyConfig
 protocol FlyConfig {
     var environment: Environment { get }
+    var showDebugRoutes: Bool { get }
 }
 
 extension FlyConfig {
-    var environment: Environment { return .Production }
+    var environment: Environment { return Environment.Production }
+    var showDebugRoutes: Bool { return environment != Environment.Production }
 }
 
 // FlyApp
@@ -194,6 +195,8 @@ extension FlyResponse: StringLiteralConvertible {
     }
 }
 
+typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
+
 // would be cool to be able to nest routers
 // maybe even have a pattern where a controller defines a router, and then nests it at a mount point?
 // that would make refactoring routes really easy
@@ -250,19 +253,6 @@ extension FlyRouter {
     }
 }
 
-typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
-
-protocol RoutableNamepsace {
-    var path: String { get }
-    var routes: [Routable] { get }
-}
-
-extension RoutableNamepsace {
-    func matchesPath(path: String) -> Bool {
-        return self.path.containsString(path)
-    }
-}
-
 protocol Routable {
     var path: String { get }
     var action: FlyAction { get }
@@ -273,7 +263,7 @@ protocol Routable {
 
 extension Routable {
     var method: HTTPMethod { return .GET }
-//    var actions: [Routable.Type] { return [] }
+    //    var actions: [Routable.Type] { return [] }
 
     func matchesPath(path: String) -> Bool {
         return self.path == path
@@ -335,9 +325,21 @@ struct BaseRoute: Routable {
 }
 
 
-class SomeController: RoutableNamepsace {
-    var path = "posts"
-    var routes: [Routable] = [
+extension RoutableController {
+    func matchesPath(path: String) -> Bool {
+        return self.dynamicType.path.containsString(path)
+    }
+}
+
+protocol RoutableController {
+    static var path: String { get }
+    static var routes: [Routable] { get }
+}
+
+
+class SomeController: RoutableController {
+    static var path = "posts"
+    static var routes: [Routable] = [
         BaseRoute("whatever") { request, response in
             return "yes, whatever"
         },
@@ -372,11 +374,6 @@ let route = FlyRouter.Route(path: "/test", method: .GET) { request, response in
 
 app.router.register(route, route, route)
 
-app.router.register(
-    SomeController().routes,
-    SomeController().routes,
-    SomeController().routes
-)
 
 app.router.route("/") { request, response in
     var response = response
