@@ -19,6 +19,14 @@ struct HTTPRoute: RequestHandler, HTTPRoutable, HTMLPrintableRoute {
         return action(request, response)
     }
 
+    var friendlyString: String {
+        return "\(method.rawValue) \(path)"
+    }
+
+    func matches(request: Request) -> Bool {
+        return matchesPath(request.path) && method == request.method
+    }
+
     var htmlString: String {
         var pathString = path
         if method == .GET {

@@ -43,15 +43,21 @@ protocol RequestHandler {
     typealias Request: Routable
     typealias Response
 
+    // returned response when no routes match
     static var defaultResponse: Response { get }
+
     var path: String { get }
     func handle(request: Request) -> Response
+
+    // have default implementations, but can be overrided
+    var friendlyString: String { get }
+    func matches(request: Request) -> Bool
 }
 
 extension RequestHandler {
 
     var friendlyString: String {
-        return self.path
+        return path
     }
 
     func matches(request: Request) -> Bool {
