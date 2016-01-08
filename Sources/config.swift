@@ -13,6 +13,8 @@ enum Environment {
     }
 }
 
+extension Environment: Equatable {}
+
 // looks like this will be automatic in a later version of Swift
 func ==(lhs: Environment, rhs: Environment) -> Bool {
     return lhs.string == rhs.string
