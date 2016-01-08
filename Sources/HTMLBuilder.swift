@@ -95,10 +95,14 @@ struct Tag: HTMLTag {
     var attributes = HTMLAttributes()
     var contentItems = [HTMLTag]()
 
+    init(_ type: TagType, _ content: String = "") {
+        self.type = type
+        self.contentItems = [content]
+    }
+
     init(_ type: TagType, attributes: HTMLAttributes = HTMLAttributes(), _ content: String = "") {
         self.type = type
         self.attributes = attributes
-        self.contentItems = [content]
     }
 
     init(_ type: TagType, htmlTags: [HTMLTag]) {
@@ -163,6 +167,21 @@ struct Link: HTMLTag {
     }
     init(_ location: String, _ content: String = "") {
         self.tag = Tag(.anchor(to: location), content)
+    }
+
+    var htmlString: String {
+        return tag.htmlString
+    }
+}
+
+struct Div: HTMLTag {
+    var tag: Tag
+
+    // init(attributes: HTMLAttributes = HTMLAttributes(), _ content: String = "") {
+    //     self.tag = Tag(.Div, attributes: attributes, content)
+    // }
+    init(_ content: String = "") {
+        self.tag = Tag(.Div, content)
     }
 
     var htmlString: String {

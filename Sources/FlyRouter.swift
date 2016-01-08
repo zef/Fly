@@ -14,7 +14,8 @@ struct HTTPRoute: RequestHandler, HTTPRoutable, HTMLPrintableRoute {
     }
 
     func respond(request: Request, params: [String: String]) -> Response {
-        var response = Response()
+        var (request, response) = (request, Response())
+        request.parameters = params
         response.request = request
         return action(request, response)
     }
@@ -58,7 +59,6 @@ protocol HTMLPrintableRoute {
 
 extension FlyRouter where Route: HTMLPrintableRoute {
     var HTMLRouteList: String {
-        // don't want to have to put [HTMLTag] here, would be nice to make that better
         let list: [String] = routes.map { route in
             route.htmlString
         }

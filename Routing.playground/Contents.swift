@@ -1,143 +1,4 @@
-//: Playground - noun: a place where people can play
-
 import UIKit
-
-enum HTTPStatus: Int {
-    // Informational
-    case Continue = 100
-    case SwitchingProtocols = 101
-    case Processing = 102
-
-    // Success
-    case OK = 200
-    case Created = 201
-    case Accepted = 202
-    case NonAuthoritativeInformation = 203
-    case NoContent = 204
-    case ResetContent = 205
-    case PartialContent = 206
-    case MultiStatus = 207
-    case AlreadyReported = 208
-    case IMUsed = 226
-
-    // Redirections
-    case MultipleChoices = 300
-    case MovedPermanently = 301
-    case Found = 302
-    case SeeOther = 303
-    case NotModified = 304
-    case UseProxy = 305
-    case SwitchProxy = 306
-    case TemporaryRedirect = 307
-    case PermanentRedirect = 308
-
-    // Client Errors
-    case BadRequest = 400
-    case Unauthorized = 401
-    case PaymentRequired = 402
-    case Forbidden = 403
-    case NotFound = 404
-    case MethodNotAllowed = 405
-    case NotAcceptable = 406
-    case ProxyAuthenticationRequired = 407
-    case RequestTimeout = 408
-    case Conflict = 409
-    case Gone = 410
-    case LengthRequired = 411
-    case PreconditionFailed = 412
-    case RequestEntityTooLarge = 413
-    case RequestURITooLong = 414
-    case UnsupportedMediaType = 415
-    case RequestedRangeNotSatisfiable = 416
-    case ExpectationFailed = 417
-    case ImATeapot = 418
-    case AuthenticationTimeout = 419
-    case UnprocessableEntity = 422
-    case Locked = 423
-    case FailedDependency = 424
-    case UpgradeRequired = 426
-    case PreconditionRequired = 428
-    case TooManyRequests = 429
-    case RequestHeaderFieldsTooLarge = 431
-    case LoginTimeout = 440
-    case NoResponse = 444
-    case RetryWith = 449
-    case UnavailableForLegalReasons = 451
-    case RequestHeaderTooLarge = 494
-    case CertError = 495
-    case NoCert = 496
-    case HTTPToHTTPS = 497
-    case TokenExpired = 498
-    case ClientClosedRequest = 499
-
-    // Server Errors
-    case InternalServerError = 500
-    case NotImplemented = 501
-    case BadGateway = 502
-    case ServiceUnavailable = 503
-    case GatewayTimeout = 504
-    case HTTPVersionNotSupported = 505
-    case VariantAlsoNegotiates = 506
-    case InsufficientStorage = 507
-    case LoopDetected = 508
-    case BandwidthLimitExceeded = 509
-    case NotExtended = 510
-    case NetworkAuthenticationRequired = 511
-    case NetworkTimeoutError = 599
-}
-
-
-enum HTTPMethod: String {
-    case GET, PUT, POST, DELETE
-    // Patch?
-}
-
-struct FlyRequest {
-    let path: String
-    let method: HTTPMethod
-
-    init(_ path: String, method: HTTPMethod = .GET) {
-        self.path = path
-        self.method = method
-    }
-}
-
-struct FlyResponse {
-    var request: FlyRequest = FlyRequest("")
-    var status: HTTPStatus = .OK
-    var body: String = ""
-
-    init() { }
-    init(status: HTTPStatus) {
-        self.status = status
-    }
-    init(body: String) {
-        self.body = body
-    }
-
-    var tuple: (status: HTTPStatus, body: String) {
-        return (status, body)
-    }
-}
-
-extension FlyResponse: StringLiteralConvertible {
-    typealias UnicodeScalarLiteralType = StringLiteralType
-    init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
-        self.init(stringLiteral: value)
-    }
-
-    typealias ExtendedGraphemeClusterLiteralType = StringLiteralType
-    init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
-        self.init(stringLiteral: value)
-    }
-
-    init(stringLiteral value: StringLiteralType) {
-        self.init(body: value)
-    }
-}
-
-
-typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
 
 // would be cool to be able to nest routers
 // maybe even have a pattern where a controller defines a router, and then nests it at a mount point?
@@ -145,7 +6,7 @@ typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
 // not sure if it's better to generate flat routes as they are added,
 // or to have a nested scheme where the nesting is calculated at matching time...
 // kinda prefer the latter
-struct FlyRouter<Route: RequestHandler> {
+struct Router<Route: RequestHandler> {
 
     var routes = [Route]()
 
@@ -207,8 +68,8 @@ extension RequestHandler {
     }
 
     func dataFromPath(requestPath: String) -> [String: String]? {
-        let templateComponents = path.characters.split(" ").map{ String($0) }
-        let pathComponents = requestPath.characters.split(" ").map{ String($0) }
+        let templateComponents = path.characters.split("/").map{ String($0) }
+        let pathComponents = requestPath.characters.split("/").map{ String($0) }
 
         guard templateComponents.count == pathComponents.count else { return nil }
 
@@ -239,6 +100,8 @@ extension RequestHandler {
     }
 }
 
+// end of generic router, now showing an example of how to use it with a simple Route class that takes a String and returns a Bool
+
 extension String: Routable {
     var path: String {
         return self
@@ -250,38 +113,69 @@ struct Route: RequestHandler {
     typealias Response = Bool
 
     let path: String
-    let action: (params: [String: String]) -> Response
+    let action: (request: Request, params: [String: String]) -> Response
 
     static var defaultResponse: Response {
         return false
     }
 
     func respond(request: Request, params: [String: String]) -> Response {
-        return action(params: params)
+        return action(request: request, params: params)
     }
 
 }
 
-var stringRouter = FlyRouter<Route>()
+var stringRouter = Router<Route>()
 
 stringRouter.register(
-    Route(path: "whatever", action: { params in
-        print("whatever params", params)
+    Route(path: "/home", action: { request, params in
+        print("")
+        print("handled path:", request)
+        print("params:", params)
         return true
     }),
-    Route(path: "something/:id/create", action: { params in
-        print("something params", params)
+    Route(path: "/something/:id/create", action: { request, params in
+        print("")
+        print("handled path:", request)
+        print("params:", params)
         return true
     })
 )
 
-stringRouter.handle("nothing")
-stringRouter.handle("something/2/create")
-stringRouter.handle("something/22/create")
-stringRouter.handle("hello there")
+stringRouter.handle("/nothing")
+stringRouter.handle("/home")
+stringRouter.handle("/something/2/create")
+stringRouter.handle("/something/22/create")
 stringRouter.handle("whatever")
 
-stringRouter.friendlyRouteList
+print("")
+print("all registered routes:\n", stringRouter.friendlyRouteList)
 
 
-extension FlyRequest: Routable {}
+// argument extraction/validation
+struct ParamParser<Result> {
+    let parse: ([String: String]) -> Result?
+}
+
+enum Action: String {
+    case watch, buy, preview
+}
+
+typealias MovieDetailActionData = (guid: Int, action: Action)
+let movieDetailParser = ParamParser<MovieDetailActionData>() { data in
+    guard let guidString = data["guid"], guid = Int(guidString),
+              actionString = data["action"], action = Action(rawValue: actionString) else { return nil }
+    return (guid, action)
+}
+
+stringRouter.register(
+    Route(path: "/movie/:guid/:action", action: { request, parameters in
+        guard let params = movieDetailParser.parse(parameters) else { return false }
+        print("Matched movie detail route:", params.guid, params.action)
+        return true
+    })
+)
+stringRouter.handle("/movie/1234/nothing")
+stringRouter.handle("/movie/1234/watch")
+
+

@@ -6,6 +6,7 @@ enum HTTPMethod: String {
 struct FlyRequest {
     let path: String
     let method: HTTPMethod
+    var parameters = [String: String]()
 
     init(_ path: String, method: HTTPMethod = .GET) {
         self.path = path
