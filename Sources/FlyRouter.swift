@@ -13,7 +13,7 @@ struct HTTPRoute: RequestHandler, HTTPRoutable, HTMLPrintableRoute {
         return FlyResponse(status: .NotFound)
     }
 
-    func handle(request: Request) -> Response {
+    func respond(request: Request, params: [String: String]) -> Response {
         var response = Response()
         response.request = request
         return action(request, response)
@@ -23,8 +23,8 @@ struct HTTPRoute: RequestHandler, HTTPRoutable, HTMLPrintableRoute {
         return "\(method.rawValue) \(path)"
     }
 
-    func matches(request: Request) -> Bool {
-        return matchesPath(request.path) && method == request.method
+    func validMatch(request: Request, data: [String: String]) -> Bool {
+        return method == request.method
     }
 
     var htmlString: String {

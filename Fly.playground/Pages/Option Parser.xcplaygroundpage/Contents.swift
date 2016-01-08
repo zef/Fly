@@ -81,3 +81,42 @@ targetParser.match("/thing/share/extra_arg")
 
 //let parsed = ParseResult(path: "/users/12/add_role/admin")
 //let parsed2 = ParseResult(path: "/users/12/admin")
+
+
+
+struct ParamTransformer<ReturnValue> {
+    typealias Options = [String: String]
+    let extractor: (Options) -> ReturnValue?
+    init(extractor: (Options) -> ReturnValue?) {
+        self.extractor = extractor
+    }
+    func params(data: Options) -> ReturnValue? {
+        return extractor(data)
+    }
+}
+
+
+enum ParseError: ErrorType {
+    case Invalid
+}
+
+let extractor: ([String: String]) throws -> TargetActionData = { data in
+    guard let target = data["target"], actionString = data["action"], action = Action(rawValue: actionString) else { throw ParseError.Invalid }
+    return (target: target, action: action)
+}
+
+try? extractor(["target": "thing", "action": "hare"])
+
+
+//typealias TargetActionData = (target: String, action: Action)
+let targetData = ParamTransformer<TargetActionData> { data in
+    guard let target = data["target"], actionString = data["action"], action = Action(rawValue: actionString) else { return nil }
+    return (target: target, action: action)
+}
+
+targetData.params(["target": "thing", "action": "share"])
+
+
+
+
+

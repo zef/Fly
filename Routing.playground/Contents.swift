@@ -148,11 +148,6 @@ typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
 struct FlyRouter<Route: RequestHandler> {
 
     var routes = [Route]()
-    var debug = false
-
-    init(debug: Bool) {
-        self.debug = debug
-    }
 
     mutating func register(routes: Route...) {
         register(routes)
@@ -162,60 +157,24 @@ struct FlyRouter<Route: RequestHandler> {
     }
 
     func handle(request: Route.Request) -> Route.Response {
-        guard let route = matchingRoute(request) else { return Route.defaultResponse }
-        return route.handle(request)
+        guard let matchData = routeMatchData(request) else { return Route.defaultResponse }
+        return matchData.route.respond(request, params: matchData.data)
     }
 
     // if path matches but not method, could suggest that to warn the dev about the potential problem
-    func matchingRoute(request: Route.Request) -> Route? {
+    func routeMatchData(request: Route.Request) -> (route: Route, data: [String: String])? {
         for route in routes {
-            if route.matches(request) {
-                return route
+            if let data = route.dataFromPath(request.path) where route.validMatch(request, data: data) {
+                return (route, data)
             }
         }
-        if debug {
-//            return debugRoute
-            return nil
-        } else {
-            return nil
-        }
+        return nil
     }
 
     var friendlyRouteList: String {
         return routes.map { return $0.friendlyString }.joinWithSeparator("\n")
     }
-
-//    var debugRoute: Route {
-//        return Route(path: "/routes", method: .GET, action: debugAction)
-//    }
-//
-//    var debugAction: FlyAction {
-//        return { request, response in
-//            var response = FlyResponse(status: .NotFound)
-//            response.body = self.HTMLRouteList
-//            return response
-//        }
-//    }
 }
-
-//protocol Routable {
-//    var path: String { get }
-//    var action: FlyAction { get }
-//
-////    // default implementation returns .GET
-////    var method: HTTPMethod { get }
-//}
-
-//struct ArgumentParser {
-//    let path = "some/path/:id/and/:whatever"
-//    let id: Int
-//    let whatever: String
-//
-//    init(path: String) {
-////        self.id = 
-//
-//    }
-//}
 
 protocol Routable {
     var path: String { get }
@@ -225,10 +184,17 @@ protocol RequestHandler {
     typealias Request: Routable
     typealias Response
 
+    // returned response when no routes match
     static var defaultResponse: Response { get }
+
     var path: String { get }
-    func handle(request: Request) -> Response
+    func respond(request: Request, params: [String: String]) -> Response
+
+    // have default implementations, but can be overrided
+    var friendlyString: String { get }
+    func validMatch(request: Request, data: [String: String]) -> Bool
 }
+
 
 extension RequestHandler {
 
@@ -236,18 +202,42 @@ extension RequestHandler {
         return self.path
     }
 
-    func matches(request: Request) -> Bool {
-        return matchesPath(request.path)
+    func validMatch(request: Request, data: [String: String]) -> Bool {
+        return true
     }
 
-    func matchesPath(path: String) -> Bool {
-        // TODO regex stuff
-        return self.path == path
+    func dataFromPath(requestPath: String) -> [String: String]? {
+        let templateComponents = path.characters.split(" ").map{ String($0) }
+        let pathComponents = requestPath.characters.split(" ").map{ String($0) }
+
+        guard templateComponents.count == pathComponents.count else { return nil }
+
+        let valueIdentifiers = templateComponents.reduce([String]()) { result, component in
+            var result = result
+            if component.characters.first == ":" {
+                result.append(component)
+            }
+            return result
+        }
+        let valueIndices = valueIdentifiers.flatMap { templateComponents.indexOf($0) }
+
+        var data = [String: String]()
+        for (index, component) in templateComponents.enumerate() {
+            guard index < pathComponents.endIndex else { return nil }
+
+            if let valueIndex = valueIndices.indexOf(index) {
+                let key = String(valueIdentifiers[valueIndex].characters.dropFirst())
+                data[key] = pathComponents[index]
+            } else {
+                if component != pathComponents[index] {
+                    return nil
+                }
+            }
+        }
+
+        return data
     }
 }
-
-//FlyResponse(status: .NotFound)
-
 
 extension String: Routable {
     var path: String {
@@ -255,33 +245,39 @@ extension String: Routable {
     }
 }
 
-struct StringRoute: RequestHandler {
+struct Route: RequestHandler {
     typealias Request = String
     typealias Response = Bool
 
     let path: String
-    let action: () -> Response
+    let action: (params: [String: String]) -> Response
 
     static var defaultResponse: Response {
         return false
     }
 
-    func handle(request: Request) -> Response {
-        return action()
+    func respond(request: Request, params: [String: String]) -> Response {
+        return action(params: params)
     }
 
 }
 
-var stringRouter = FlyRouter<StringRoute>(debug: false)
+var stringRouter = FlyRouter<Route>()
 
 stringRouter.register(
-    StringRoute(path: "whatever", action: {
-        print("whatever route")
+    Route(path: "whatever", action: { params in
+        print("whatever params", params)
+        return true
+    }),
+    Route(path: "something/:id/create", action: { params in
+        print("something params", params)
         return true
     })
 )
 
 stringRouter.handle("nothing")
+stringRouter.handle("something/2/create")
+stringRouter.handle("something/22/create")
 stringRouter.handle("hello there")
 stringRouter.handle("whatever")
 
@@ -289,76 +285,3 @@ stringRouter.friendlyRouteList
 
 
 extension FlyRequest: Routable {}
-
-protocol HTMLPrintableRoute {
-    var htmlString: String { get }
-}
-
-struct HTTPRoute: RequestHandler, HTMLPrintableRoute {
-    typealias Request = FlyRequest
-    typealias Response = FlyResponse
-
-    let path: String
-    let method: HTTPMethod
-    let action: (Request, Response) -> Response
-
-    static var defaultResponse: Response {
-        return FlyResponse(status: .NotFound)
-    }
-
-    func handle(request: Request) -> Response {
-        var response = Response()
-        response.request = request
-        return action(request, response)
-    }
-
-    var htmlString: String {
-        return "link \(path)"
-    }
-}
-
-var flyRouter = FlyRouter<HTTPRoute>(debug: false)
-
-let httpRoute = HTTPRoute(path: "hey", method: .POST) { request, response in
-    return "matched hey"
-}
-
-flyRouter.register(httpRoute)
-flyRouter.routes.first?.htmlString
-
-extension FlyRouter where Route: HTMLPrintableRoute {
-    var HTMLRouteList: String {
-        return "HTML"
-    }
-//        // don't want to have to put [HTMLTag] here, would be nice to make that better
-//        let list: [HTMLTag] = routes.map { route in
-//            var path = route.path
-//            if route.method == .GET {
-//                path = Link(route.path, route.path).htmlString
-//            }
-//            return Tag(.Li, "\(route.method) \(path)")
-//        }
-//        let template = HTML5([
-//            Tag(.H2, "Route not found, how about one of these?"),
-//            Tag(.Ul, htmlTags: list),
-//            ])
-//        return template.htmlString
-//    }
-}
-
-extension FlyRouter {
-//    struct Route: Routable {
-//        let path: String
-//        let method: HTTPMethod
-//        let action: FlyAction
-//    }
-//
-//    mutating func route(path: String, method: HTTPMethod = .GET, action: FlyAction) {
-//        let route = Route(path: path, method: method, action: action)
-//        register(route)
-//    }
-//
-//    mutating func GET(path: String, action: FlyAction) {
-//        self.route(path, method: .GET, action: action)
-//    }
-}

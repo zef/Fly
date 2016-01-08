@@ -16,15 +16,15 @@ struct FlyRouter<Route: RequestHandler> {
     }
 
     func handle(request: Route.Request) -> Route.Response {
-        guard let route = matchingRoute(request) else { return Route.defaultResponse }
-        return route.handle(request)
+        guard let matchData = routeMatchData(request) else { return Route.defaultResponse }
+        return matchData.route.respond(request, params: matchData.data)
     }
 
     // if path matches but not method, could suggest that to warn the dev about the potential problem
-    func matchingRoute(request: Route.Request) -> Route? {
+    func routeMatchData(request: Route.Request) -> (route: Route, data: [String: String])? {
         for route in routes {
-            if route.matches(request) {
-                return route
+            if let data = route.dataFromPath(request.path) where route.validMatch(request, data: data) {
+                return (route, data)
             }
         }
         return nil
@@ -47,26 +47,53 @@ protocol RequestHandler {
     static var defaultResponse: Response { get }
 
     var path: String { get }
-    func handle(request: Request) -> Response
+    func respond(request: Request, params: [String: String]) -> Response
 
     // have default implementations, but can be overrided
     var friendlyString: String { get }
-    func matches(request: Request) -> Bool
+    func validMatch(request: Request, data: [String: String]) -> Bool
 }
+
 
 extension RequestHandler {
 
     var friendlyString: String {
-        return path
+        return self.path
     }
 
-    func matches(request: Request) -> Bool {
-        return matchesPath(request.path)
+    func validMatch(request: Request, data: [String: String]) -> Bool {
+        return true
     }
 
-    func matchesPath(path: String) -> Bool {
-        // TODO regex stuff
-        return self.path == path
+    func dataFromPath(requestPath: String) -> [String: String]? {
+        let templateComponents = path.characters.split("/").map{ String($0) }
+        let pathComponents = requestPath.characters.split("/").map{ String($0) }
+
+        guard templateComponents.count == pathComponents.count else { return nil }
+
+        let valueIdentifiers = templateComponents.reduce([String]()) { result, component in
+            var result = result
+            if component.characters.first == ":" {
+                result.append(component)
+            }
+            return result
+        }
+        let valueIndices = valueIdentifiers.flatMap { templateComponents.indexOf($0) }
+
+        var data = [String: String]()
+        for (index, component) in templateComponents.enumerate() {
+            guard index < pathComponents.endIndex else { return nil }
+
+            if let valueIndex = valueIndices.indexOf(index) {
+                let key = String(valueIdentifiers[valueIndex].characters.dropFirst())
+                data[key] = pathComponents[index]
+            } else {
+                if component != pathComponents[index] {
+                    return nil
+                }
+            }
+        }
+
+        return data
     }
 }
-
