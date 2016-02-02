@@ -11,6 +11,10 @@ Epoch](https://github.com/Zewo/Epoch) library.
 - [Protocol-Oriented](https://developer.apple.com/videos/play/wwdc2015-408/). Components of Fly
   should be connected via protocols so that they can are useful outside of Fly, or can be replaced
   entirely by other libraries.
+- Compiler-focused. Fly attempts to lean heavily on the type system to reduce bugs and potential for
+  errors by pushing as much as possible to the compiler. This means:
+    - Avoiding throwing out type data by using `Any` and `AnyObject`
+    - Reducing the use of strings in subscripts for fetching data
 - Concise, but not at the expense of clarity and flexibility.
 
 
