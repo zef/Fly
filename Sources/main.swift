@@ -1,46 +1,7 @@
 print("Let's fly 🛩")
 
-// import Foundation
-// import POSIXRegex
-// import Core
-
-#if os(Linux)
-    import Glibc
-#else
-    import Darwin.C
-#endif
-import HTTP
-import Epoch
-import CHTTPParser
-import CLibvenice
-
-struct EpochBridge: ResponderType {
-
-    let app: FlyApp
-
-    init(_ app: FlyApp) {
-        self.app = app
-    }
-
-    func respond(request: Request) -> Response {
-        let flyRequest = FlyRequest(request.uri.description)
-        let (status, body) = app.router.handle(flyRequest).tuple
-        var responseBody = body
-        if status == .NotFound {
-            if app.config.showDebugRoutes {
-                responseBody = app.router.HTMLRouteList
-            } else {
-                responseBody = "Page not Found"
-            }
-        }
-        print("received request:", request.uri.description, "-> \(status)")
-        return Response(status: Status(statusCode: status.rawValue), body: responseBody)
-    }
-}
-
 let app = App(config: Config())
-let responder = EpochBridge(app)
-let server = Server(port: 8080, responder: responder)
-
-server.start()
+let server: FlyServer.Type = HTTP4SwiftServer.self
+// let server: FlyServer.Type = EpochServer.self
+server.start(app, port: 8080)
 

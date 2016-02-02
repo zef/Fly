@@ -26,10 +26,6 @@ struct FlyResponse {
     init(body: String) {
         self.body = body
     }
-
-    var tuple: (status: HTTPStatus, body: String) {
-        return (status, body)
-    }
 }
 
 extension FlyResponse: StringLiteralConvertible {

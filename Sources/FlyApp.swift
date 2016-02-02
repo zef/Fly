@@ -22,6 +22,9 @@ class App: FlyApp {
     var environment: Environment {
         return config.environment
     }
+}
 
+protocol FlyServer {
+    static func start(app: FlyApp, port: Int)
 }
 
