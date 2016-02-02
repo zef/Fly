@@ -2,8 +2,8 @@
 
 This is the beginning of some ideas for a Swift web framework intended to be run on linux.
 
-At the moment the server component is handled by [Zewo's
-Epoch](https://github.com/Zewo/Epoch) library.
+Adapters for the server component are implemented for [http4swift](https://github.com/takebayashi/http4swift) and [Zewo's
+Epoch](https://github.com/Zewo/Epoch). Epoch only compiles on linux, so it is currently disabled.
 
 
 ## Goals
