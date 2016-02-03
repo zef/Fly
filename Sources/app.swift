@@ -2,26 +2,6 @@ struct Config: FlyConfig {
     var environment = Environment.Development
 }
 
-class UserController {
-    class func new(request: FlyRequest, response: FlyResponse) -> FlyResponse {
-        return "New User Form"
-    }
-
-    class func create(request: FlyRequest, response: FlyResponse) -> FlyResponse {
-        return "Creating a new user!"
-    }
-
-    class func show(request: FlyRequest, response: FlyResponse) -> FlyResponse {
-        let id = request.parameters["id"] ?? ""
-        var response = response
-        response.body = HTML5([
-            Tag(.H1, "Showing User"),
-            Div("Got user ID: \(id)")
-        ]).htmlString
-        return response
-    }
-}
-
 extension App {
     func setup() {
         router.route("/users/new", action: UserController.new)
@@ -43,5 +23,25 @@ extension App {
             return response
         }
 
+    }
+}
+
+class UserController {
+    class func new(request: FlyRequest, response: FlyResponse) -> FlyResponse {
+        return "New User Form"
+    }
+
+    class func create(request: FlyRequest, response: FlyResponse) -> FlyResponse {
+        return "Creating a new user!"
+    }
+
+    class func show(request: FlyRequest, response: FlyResponse) -> FlyResponse {
+        let id = request.parameters["id"] ?? ""
+        var response = response
+        response.body = HTML5([
+            Tag(.H1, "Showing User"),
+            Div("Got user ID: \(id)")
+        ]).htmlString
+        return response
     }
 }
