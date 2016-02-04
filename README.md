@@ -20,7 +20,6 @@ Epoch](https://github.com/Zewo/Epoch). Epoch only compiles on linux, so it is cu
 
 ## Ideas
 
-- Routing: Use a typealias for request/response types so it's better to use outside of a web context.
 - Localization
   - Use `enum` with associated values for localization of strings that require arguments
   - Provide a tool to help devs create localization files based on the added enum cases?
