@@ -6,7 +6,6 @@ public protocol HTMLElement {
     var htmlString: String { get }
 }
 
-
 extension String: HTMLElement {
     public var htmlString: String { return self }
 }
@@ -15,70 +14,10 @@ public protocol HTMLView {
     var render: String { get }
 }
 
-public enum Whitespace {
-    case None, Pre, Post, All
-    var pre: String {
-        switch self {
-        case .Pre, .All:
-            return " "
-        default:
-            return ""
-        }
-    }
-
-    var post: String {
-        switch self {
-        case .Post, .All:
-            return " "
-        default:
-            return ""
-        }
-    }
-
-    public mutating func combine(other: Whitespace) {
-        switch other {
-        case .Pre where self == .Post:
-            self = .All
-        case .Post where self == .Pre:
-            self = .All
-        default:
-            self = other
-        }
-    }
-}
-
-//public struct HTMLContent: HTMLElement {
-//
-//    public var components = [HTMLElement]()
-//    public var whitespace = Whitespace.None
-//
-//    public init(component: HTMLElement) {
-//        self.components = [component]
-//    }
-//    public init(components: [HTMLElement]) {
-//        self.components = components
-//    }
-//
-//    public init(components: [HTMLElement], whitespace: Whitespace) {
-//        self.components = components
-//        self.whitespace = whitespace
-//    }
-//
-//    public init(_ component: HTMLElement, whitespace: Whitespace) {
-//        self.components = [component]
-//        self.whitespace = whitespace
-//    }
-//
-//    public var htmlString: String {
-//        return components.map { $0.whitespace.pre + $0.htmlString + $0.whitespace.post }.joinWithSeparator("")
-//    }
-//}
-
 public struct Tag: HTMLElement {
-
     public var type: String
-    public var attributes = HTMLAttributes()
     public var content = [HTMLElement]()
+    public var attributes = HTMLAttributes()
     public var whitespace = Whitespace.None
 
     public init(_ type: String, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes(), _ content: [HTMLElement]) {
@@ -91,22 +30,6 @@ public struct Tag: HTMLElement {
         self.type = type
         self.attributes = combinedAttributes(attributes, id: id, classes: classes, data: data)
         self.content = [content]
-    }
-
-    private func combinedAttributes(attributes: HTMLAttributes, id: String?, classes: [String]?, data: HTMLAttributes?) -> HTMLAttributes {
-        var attributes = attributes
-        if let data = data {
-            for (name, value) in data {
-                attributes["data-\(name)"] = value
-            }
-        }
-        if let classes = classes {
-            attributes["class"] = classes.joinWithSeparator(" ")
-        }
-        if let id = id {
-            attributes["id"] = id
-        }
-        return attributes
     }
 
     public var htmlString: String {
@@ -139,9 +62,63 @@ public struct Tag: HTMLElement {
         })
     }
 
-    var description: String {
+    private func combinedAttributes(attributes: HTMLAttributes, id: String?, classes: [String]?, data: HTMLAttributes?) -> HTMLAttributes {
+        var attributes = attributes
+        if let data = data {
+            for (name, value) in data {
+                attributes["data-\(name)"] = value
+            }
+        }
+        if let classes = classes {
+            attributes["class"] = classes.joinWithSeparator(" ")
+        }
+        if let id = id {
+            attributes["id"] = id
+        }
+        return attributes
+    }
+
+}
+
+extension Tag: CustomStringConvertible {
+    public var description: String {
         return htmlString
     }
+}
+
+extension Tag {
+    public enum Whitespace {
+        case None, Pre, Post, All
+        var pre: String {
+            switch self {
+            case .Pre, .All:
+                return " "
+            default:
+                return ""
+            }
+        }
+
+        var post: String {
+            switch self {
+            case .Post, .All:
+                return " "
+            default:
+                return ""
+            }
+        }
+
+        public mutating func combine(other: Whitespace) {
+            switch other {
+            case .Pre where self == .Post:
+                self = .All
+            case .Post where self == .Pre:
+                self = .All
+            default:
+                self = other
+            }
+        }
+    }
+
 }
 
 //extension Tag: StringLiteralConvertible {
