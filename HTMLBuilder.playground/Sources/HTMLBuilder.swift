@@ -2,30 +2,13 @@ import Foundation
 
 public typealias HTMLAttributes = [String: String]
 
-public protocol Whitespaceable {
-    var whitespace: Whitespace { get set }
-}
-//public extension Whitespaceable {
-//    var whitespace: Whitespace { return .None }
-//}
-
-public protocol HTMLElement: Whitespaceable {
-//public protocol HTMLElement {
+public protocol HTMLElement {
     var htmlString: String { get }
 }
 
 
 extension String: HTMLElement {
     public var htmlString: String { return self }
-
-    public var whitespace: Whitespace {
-        get {
-            return .None
-        }
-        set {
-            //
-        }
-    }
 }
 
 public protocol HTMLView {
