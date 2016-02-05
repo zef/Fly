@@ -176,9 +176,9 @@ public struct Tag: HTMLElement {
 //        self.init("", attributes: [:], [value])
 //    }
 //}
-//
-//extension Tag: ArrayLiteralConvertible {
-//    public init(arrayLiteral elements: HTMLElement...) {
-//        self.init("", attributes: [:], elements)
-//    }
-//}
+
+extension Tag: ArrayLiteralConvertible {
+    public init(arrayLiteral elements: HTMLElement...) {
+        self.init("", attributes: [:], elements)
+    }
+}
