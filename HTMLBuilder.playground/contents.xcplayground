@@ -3,6 +3,5 @@
     <pages>
         <page name='Ideas'/>
         <page name='Generator Support'/>
-        <page name='Code Generator'/>
     </pages>
 </playground>
