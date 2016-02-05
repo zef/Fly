@@ -88,6 +88,36 @@ print("}")
 
 
 
+let file = "file.txt" //this is the file. we will write to and read from it
+
+let text = "some text" //just a text
+
+
+String(__FILE__)
+__LINE__
+__COLUMN__
+__FUNCTION__
+//__DSO_HANDLE__
+
+
+//if let dir: NSString = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.AllDomainsMask, true).first {
+//    let path = dir.stringByAppendingPathComponent(file);
+//
+//    //writing
+//    do {
+//        try text.writeToFile(path, atomically: false, encoding: NSUTF8StringEncoding)
+//    }
+//    catch {/* error handling here */}
+//
+//    //reading
+//    do {
+//        let text2 = try NSString(contentsOfFile: path, encoding: NSUTF8StringEncoding)
+//    }
+//    catch {/* error handling here */}
+//}
+
+
+
 
 
 //: [Next](@next)
