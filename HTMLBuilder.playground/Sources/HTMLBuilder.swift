@@ -110,13 +110,7 @@ public struct Tag: HTMLElement {
         self.content = [content]
     }
 
-//    public init(_ type: String, _ content: HTMLContent) {
-//        self.type = type
-//        self.content = content
-//    }
-
-
-    func combinedAttributes(attributes: HTMLAttributes, id: String?, classes: [String]?, data: HTMLAttributes?) -> HTMLAttributes {
+    private func combinedAttributes(attributes: HTMLAttributes, id: String?, classes: [String]?, data: HTMLAttributes?) -> HTMLAttributes {
         var attributes = attributes
         if let data = data {
             for (name, value) in data {
@@ -173,24 +167,24 @@ public struct Tag: HTMLElement {
     }
 }
 
-extension Tag: StringLiteralConvertible {
-    public typealias UnicodeScalarLiteralType = StringLiteralType
-    public init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
-        self.init(stringLiteral: value)
-    }
-
-    public typealias ExtendedGraphemeClusterLiteralType = StringLiteralType
-    public init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
-        self.init(stringLiteral: value)
-    }
-
-    public init(stringLiteral value: StringLiteralType) {
-        self.init("", attributes: [:], [value])
-    }
-}
-
-extension Tag: ArrayLiteralConvertible {
-    public init(arrayLiteral elements: HTMLElement...) {
-        self.init("", attributes: [:], elements)
-    }
-}
+//extension Tag: StringLiteralConvertible {
+//    public typealias UnicodeScalarLiteralType = StringLiteralType
+//    public init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
+//        self.init(stringLiteral: value)
+//    }
+//
+//    public typealias ExtendedGraphemeClusterLiteralType = StringLiteralType
+//    public init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
+//        self.init(stringLiteral: value)
+//    }
+//
+//    public init(stringLiteral value: StringLiteralType) {
+//        self.init("", attributes: [:], [value])
+//    }
+//}
+//
+//extension Tag: ArrayLiteralConvertible {
+//    public init(arrayLiteral elements: HTMLElement...) {
+//        self.init("", attributes: [:], elements)
+//    }
+//}
