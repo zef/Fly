@@ -13,7 +13,7 @@ func write(text: String) {
 extension String {
     mutating func addLine(content: String, indent: Int = 0) {
         var indentation = ""
-        for _ in 0..<indent {
+        for _ in 0..<indent where !content.isEmpty {
             indentation += "    "
         }
         self += "\n" + indentation + content
