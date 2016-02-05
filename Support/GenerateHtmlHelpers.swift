@@ -1,8 +1,7 @@
 import Foundation
 
 // let read = try! String(contentsOfFile: "/Users/zef/code/Fly/HTMLTags.swift")
-func write(text: String) {
-    let path = "HTMLViewTags.swift"
+func write(text: String, path: String) {
     do {
         try text.writeToFile(path, atomically: false, encoding: NSUTF8StringEncoding)
     } catch {
@@ -76,5 +75,7 @@ for tag in tags {
 }
 code.addLine("}")
 
-write(code)
+write(code, path: "HTMLViewTags.swift")
+write(code, path: "../HTMLBuilder.playground/Sources/HTMLTags.swift")
+
 
