@@ -102,10 +102,9 @@ struct HTML5: HTMLView {
                             Li("Sign In")
                         ])
                     ]),
-                    H1("Welcome to New York."),
-                    H3("Welcome to New York."),
+                    Section(content),
                     Hr(classes: ["very-nice"]),
-                    Div(content)
+                    Footer([])
                 ])
             ])
         ]
@@ -122,13 +121,14 @@ struct SomeView: HTMLView {
     let bulletPoints = [
         "Swift is really great",
         "There are some cool things we could do with Swift",
+        "Especially now that you can run it on linux",
     ]
     let template = HTML5.self
 
     var content: [HTMLElement] {
         return [
             H1(product),
-            H3(subtitle),
+            <<H3(subtitle)>>,
             P("I really hope you like it"),
             Ul(classes: ["bullet-list"],
                 bulletPoints.map { Li($0) }
