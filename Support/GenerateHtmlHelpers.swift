@@ -55,6 +55,21 @@ struct TagDefinition {
 
 // to handle manually:
 // a link img video input
+// typealias TagConfig = (functionName: String, )
+
+struct TagConfig {
+    var function: String
+    var attributes: (argument: String, type: String, default: String?)
+}
+
+// let tagConfiguration: [
+//     // "a":
+//     // "link":
+//     // "input":
+//     // "img":
+//     // "video":
+//     // "script":
+// ]
 
 let basicTagGroups = [
     "html head body",

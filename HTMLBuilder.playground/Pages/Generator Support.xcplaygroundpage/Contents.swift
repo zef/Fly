@@ -87,6 +87,7 @@ prefix func <<>>(tag: Tag) -> Tag {
 struct HTML5: HTMLView {
 
     var content: [HTMLElement]
+//    var footerContent: [HTMLElement]
 
     var template: Tag {
         return [
@@ -95,8 +96,15 @@ struct HTML5: HTMLView {
 
                 ]),
                 Body([
+                    Header([
+                        Nav([
+                            Li("Sign Up"),
+                            Li("Sign In")
+                        ])
+                    ]),
                     H1("Welcome to New York."),
                     H3("Welcome to New York."),
+                    Hr(classes: ["very-nice"]),
                     Div(content)
                 ])
             ])
