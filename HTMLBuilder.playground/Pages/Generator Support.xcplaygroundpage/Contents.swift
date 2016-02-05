@@ -19,9 +19,6 @@ extension HTMLView {
 //    public func Link(to location: String, _ content: String) -> Tag {
 //        return Tag("a", attributes: [:], HTMLContent(component: content))
 //    }
-    public func Raw(text: String) -> Tag {
-        return Tag("", attributes: [:], [text])
-    }
 }
 
 //struct link: HTMLElement {

@@ -128,9 +128,7 @@ public struct Tag: HTMLElement {
 
     public var htmlString: String {
         let tag: String
-        if isRaw {
-            tag = contentString
-        } else if isVoid {
+        if isVoid {
             tag = "<\(type)\(attributeString) />"
         } else {
             tag = "<\(type)\(attributeString)>\(contentString)</\(type)>"
@@ -138,16 +136,12 @@ public struct Tag: HTMLElement {
         return whitespace.pre + tag + whitespace.post
     }
 
-    public var isRaw: Bool {
-        return type.isEmpty
-    }
-
     static let voidElements = ["area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
     public var isVoid: Bool {
         return Tag.voidElements.contains(type)
     }
 
-    private var contentString: String {
+    public var contentString: String {
         return content.map { $0.htmlString }.joinWithSeparator("")
     }
 
