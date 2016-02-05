@@ -33,13 +33,19 @@ struct TagDefinition {
     var methodDefinition: String {
         var def = ""
 
-        def.addLine("public func \(tag.capitalizedString)(attributes attributes: HTMLAttributes = HTMLAttributes(), id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, _ content: [HTMLElement]) -> Tag {")
-        def.addLine("return Tag(\(tag.quoted), id: id, classes: classes, data: data, attributes: attributes, content)", indent: 1)
-        def.addLine("}")
+        if isVoid {
+            def.addLine("public func \(tag.capitalizedString)(id id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes()) -> Tag {")
+            def.addLine("return Tag(\(tag.quoted), \"\", id: id, classes: classes, data: data, attributes: attributes)", indent: 1)
+            def.addLine("}")
+        } else {
+            def.addLine("public func \(tag.capitalizedString)(id id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes(), _ content: [HTMLElement]) -> Tag {")
+            def.addLine("return Tag(\(tag.quoted), id: id, classes: classes, data: data, attributes: attributes, content)", indent: 1)
+            def.addLine("}")
 
-        def.addLine("public func \(tag.capitalizedString)(content: HTMLElement, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil,  attributes: HTMLAttributes = HTMLAttributes()) -> Tag {")
-        def.addLine("return Tag(\(tag.quoted), id: id, classes: classes, data: data, attributes: attributes, [content])", indent: 1)
-        def.addLine("}")
+            def.addLine("public func \(tag.capitalizedString)(content: HTMLElement, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil,  attributes: HTMLAttributes = HTMLAttributes()) -> Tag {")
+            def.addLine("return Tag(\(tag.quoted), id: id, classes: classes, data: data, attributes: attributes, [content])", indent: 1)
+            def.addLine("}")
+        }
 
         def.addLine("")
         return def
@@ -53,10 +59,11 @@ struct TagDefinition {
 let basicTagGroups = [
     "html head body",
     "div span",
-    "article aside header nav main section",
+    "article aside header footer nav main section",
     "h1 h2 h3 h4 h5 h6",
     "p strong em i",
     "ul ol li",
+    "br hr",
 ]
 
 var tags = basicTagGroups.reduce([TagDefinition]()) { tags, group in
