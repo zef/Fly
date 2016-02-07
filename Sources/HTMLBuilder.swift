@@ -1,191 +1,153 @@
-typealias HTMLAttributes = [String: String]
+import Foundation
 
-enum TagType {
-    // I'd like to decide about using a single case some tags vs supporting multiple options
-    // like Br vs Break, and also Link. I kinda prefer the more human-readable versions, but they
-    // also require more learning and abstraction since they're a departure from the standard.
-    case HTML, Head, Body
+public typealias HTMLAttributes = [String: String]
 
-    case H1, H2, H3, H4, H5, H6
-    case Header, Footer, Section, Article, Nav
-
-    case Div, Span
-    case Br, Break
-    case Hr
-    case Ul, Li
-
-    case a(to: String)
-    case anchor(to: String)
-    case link(to: String)
-    case img(src: String)
-
-    var tagName: String {
-        switch self {
-        case .HTML: return "html"
-        case .Head: return "head"
-        case .Body: return "body"
-
-        case .Header: return "header"
-        case .Footer: return "footer"
-        case .Section: return "section"
-        case .Article: return "article"
-        case .Nav: return "nav"
-
-
-        case .Div: return "div"
-        case .Span: return "span"
-        case .Ul: return "ul"
-        case .Li: return "li"
-
-        case .H1: return "h1"
-        case .H2: return "h2"
-        case .H3: return "h3"
-        case .H4: return "h4"
-        case .H5: return "h5"
-        case .H6: return "h6"
-
-        case .Br, .Break: return "br"
-        case .Hr: return "hr"
-
-        case .a, .anchor: return "a"
-        case .img: return "img"
-        case .link: return "link"
-        }
-    }
-
-    // self-closing tags are called Void elements: http://www.w3.org/TR/html5/syntax.html#void-elements
-    static let voidElements = ["area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-    var isVoid: Bool {
-        return TagType.voidElements.contains(tagName)
-    }
-
-    var attributes: HTMLAttributes {
-        var attributes = HTMLAttributes()
-
-        switch self {
-        case .a(let href):
-            attributes["href"] = href
-        case .anchor(let href):
-            attributes["href"] = href
-        case .link(let href):
-            attributes["href"] = href
-        case .img(let src):
-            attributes["src"] = src
-        default:
-            break
-        }
-
-        return attributes
-    }
-}
-
-protocol HTMLTag {
+public protocol HTMLElement {
     var htmlString: String { get }
 }
 
-extension String: HTMLTag {
-    var htmlString: String { return self }
+extension String: HTMLElement {
+    public var htmlString: String { return self }
 }
 
-//protocol HTMLContent {}
+public protocol HasHTML { }
 
-struct Tag: HTMLTag {
+public protocol HTMLView: HasHTML {
+    var render: String { get }
+}
 
-    var type: TagType
-    var attributes = HTMLAttributes()
-    var contentItems = [HTMLTag]()
+public struct Tag: HTMLElement {
+    public var type: String
+    public var content = [HTMLElement]()
+    public var attributes = HTMLAttributes()
+    public var whitespace = Whitespace.None
 
-    init(_ type: TagType, _ content: String = "") {
+    public init(_ type: String, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes(), _ content: [HTMLElement]) {
         self.type = type
-        self.contentItems = [content]
+        self.attributes = combinedAttributes(attributes, id: id, classes: classes, data: data)
+        self.content = content
     }
 
-    init(_ type: TagType, attributes: HTMLAttributes = HTMLAttributes(), _ content: String = "") {
+    public init(_ type: String, _ content: HTMLElement = "", id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes()) {
         self.type = type
-        self.attributes = attributes
+        self.attributes = combinedAttributes(attributes, id: id, classes: classes, data: data)
+        self.content = [content]
     }
 
-    init(_ type: TagType, htmlTags: [HTMLTag]) {
-        self.type = type
-        self.contentItems = htmlTags
-    }
-
-    var htmlString: String {
-        let content = contentItems.map { $0.htmlString }.joinWithSeparator("")
-        let tagName = type.tagName
-        if type.isVoid {
-            return "<\(tagName)\(attributeString) />"
+    public var htmlString: String {
+        let tag: String
+        if isVoid {
+            tag = "<\(type)\(attributeString) />"
         } else {
-            return "<\(tagName)\(attributeString)>\(content)</\(tagName)>"
+            tag = "<\(type)\(attributeString)>\(contentString)</\(type)>"
         }
+        return whitespace.pre + tag + whitespace.post
     }
 
-    var attributeString: String {
-        var allAttributes = attributes
-        for (key, value) in type.attributes {
-            allAttributes[key] = value
-        }
+    static let voidElements = ["area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
+    public var isVoid: Bool {
+        return Tag.voidElements.contains(type)
+    }
 
-        guard !allAttributes.isEmpty else { return "" }
-        return allAttributes.reduce("", combine: { (result, pair) -> String in
+    public var contentString: String {
+        return content.map { $0.htmlString }.joinWithSeparator("")
+    }
+
+    private var attributeString: String {
+        guard !attributes.isEmpty else { return "" }
+        return attributes.reduce("", combine: { (result, pair) -> String in
             var result = result
             let (key, value) = pair
-            // TODO: escape quotes in value
+            // TODO: escape quotes and other chars in value
             result += " \(key)=\"\(value)\""
             return result
         })
     }
 
-    var description: String {
+    private func combinedAttributes(attributes: HTMLAttributes, id: String?, classes: [String]?, data: HTMLAttributes?) -> HTMLAttributes {
+        var attributes = attributes
+        if let data = data {
+            for (name, value) in data {
+                attributes["data-\(name)"] = value
+            }
+        }
+        if let classes = classes {
+            attributes["class"] = classes.joinWithSeparator(" ")
+        }
+        if let id = id {
+            attributes["id"] = id
+        }
+        return attributes
+    }
+
+}
+
+extension Tag: CustomStringConvertible {
+    public var description: String {
         return htmlString
     }
 }
 
-struct HTML5: HTMLTag {
-    var tag: Tag
+extension Tag {
+    public enum Whitespace {
+        case None, Pre, Post, All
+        var pre: String {
+            switch self {
+            case .Pre, .All:
+                return " "
+            default:
+                return ""
+            }
+        }
+
+        var post: String {
+            switch self {
+            case .Post, .All:
+                return " "
+            default:
+                return ""
+            }
+        }
+
+        public mutating func combine(other: Whitespace) {
+            switch other {
+            case .Pre where self == .Post:
+                self = .All
+            case .Post where self == .Pre:
+                self = .All
+            default:
+                self = other
+            }
+        }
+    }
+}
+
+struct HTML5: HTMLView {
     let doctype = "<!DOCTYPE html>"
+    var head: [HTMLElement]
+    var body: [HTMLElement]
 
-    init(_ tags: [HTMLTag]) {
-        let content = tags.map { $0.htmlString }.joinWithSeparator("")
-
-        self.tag = Tag(.HTML, htmlTags: [
-            Tag(.Head, ""),
-            Tag(.Body, content),
+    var template: Tag {
+        return Html([
+            Head(head),
+            Body(body)
         ])
     }
 
-    var htmlString: String {
-        return doctype + tag.htmlString
-    }
-}
-// would be really tedious to implement a bunch of these... maybe autogenerate them based on attributes?
-struct Link: HTMLTag {
-    var tag: Tag
-
-    init(_ location: String, attributes: HTMLAttributes = HTMLAttributes(), _ content: String = "") {
-        self.tag = Tag(.anchor(to: location), attributes: attributes, content)
-    }
-    init(_ location: String, _ content: String = "") {
-        self.tag = Tag(.anchor(to: location), content)
-    }
-
-    var htmlString: String {
-        return tag.htmlString
+    var render: String {
+        return doctype + template.htmlString
     }
 }
 
-struct Div: HTMLTag {
-    var tag: Tag
-
-    // init(attributes: HTMLAttributes = HTMLAttributes(), _ content: String = "") {
-    //     self.tag = Tag(.Div, attributes: attributes, content)
-    // }
-    init(_ content: String = "") {
-        self.tag = Tag(.Div, content)
+extension HasHTML {
+    public func Link(to location: String, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes(), _ content: [HTMLElement]) -> Tag {
+        var attributes = attributes
+        attributes["href"] = location
+        return Tag("a", id: id, classes: classes, data: data, attributes: attributes, content)
     }
-
-    var htmlString: String {
-        return tag.htmlString
+    public func Link(to location: String, _ content: HTMLElement, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil,  attributes: HTMLAttributes = HTMLAttributes()) -> Tag {
+        var attributes = attributes
+        attributes["href"] = location
+        return Tag("a", id: id, classes: classes, data: data, attributes: attributes, [content])
     }
 }
-

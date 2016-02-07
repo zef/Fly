@@ -28,12 +28,21 @@ struct HTTPRoute: RequestHandler, HTTPRoutable, HTMLPrintableRoute {
         return method == request.method
     }
 
-    var htmlString: String {
-        var pathString = path
-        if method == .GET {
-            pathString = Link(path, path).htmlString
+    struct LinkView: HTMLView {
+        let path: String
+        let method: HTTPMethod
+
+        var render: String {
+            var pathString = path
+            if method == .GET {
+                pathString = Link(to: path, path).htmlString
+            }
+            return "\(method) \(pathString)"
         }
-        return Tag(.Li, "\(method) \(pathString)").htmlString
+    }
+
+    var htmlString: String {
+        return LinkView(path: path, method: method).render
     }
 }
 
@@ -57,16 +66,24 @@ protocol HTMLPrintableRoute {
     var htmlString: String { get }
 }
 
+struct RouteView: HTMLView {
+    let routes: [HTMLPrintableRoute]
+
+    var render: String {
+        let listElements = routes.map { Li($0.htmlString) as HTMLElement }
+
+        return HTML5(head: [], body: [
+            H2("Route not found, how about one of these?"),
+            Ul(listElements)
+        ]).render
+    }
+}
+
 extension FlyRouter where Route: HTMLPrintableRoute {
+
     var HTMLRouteList: String {
-        let list: [String] = routes.map { route in
-            route.htmlString
-        }
-        let template = HTML5([
-            Tag(.H2, "Route not found, how about one of these?"),
-            Tag(.Ul, list.joinWithSeparator("")),
-        ])
-        return template.htmlString
+        let printableRoutes = routes.map { $0 as HTMLPrintableRoute }
+        return RouteView(routes: printableRoutes).render
     }
 }
 

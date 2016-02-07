@@ -8,7 +8,7 @@ extension App {
         router.route("/users/:id", action: UserController.show)
         router.route("/users/create", method: .POST, action: UserController.create)
 
-        // not sure I like this:
+        // not sure I like the .GET thing:
         router.GET("/welcome") { request, response in
             return "Welcome to our web page"
         }
@@ -17,9 +17,17 @@ extension App {
             return "Why are you posting to /welcome?"
         }
 
+        struct HomeView: HTMLView {
+            var render: String {
+                return HTML5(head: [], body: [
+                    H1("Welcome Home.")
+                ]).render
+            }
+        }
+
         router.route("/") { request, response in
             var response = response
-            response.body = HTML5([Tag(.Div, "Home page!")]).htmlString
+            response.body = HomeView().render
             return response
         }
 
@@ -38,10 +46,23 @@ class UserController {
     class func show(request: FlyRequest, response: FlyResponse) -> FlyResponse {
         let id = request.parameters["id"] ?? ""
         var response = response
-        response.body = HTML5([
-            Tag(.H1, "Showing User"),
-            Div("Got user ID: \(id)")
-        ]).htmlString
+        response.body = ShowView(id: id).render
+        // return HTML5(head: [], body: [
+        //     H1("Showing User"),
+        //     Div("User ID: \(id)"),
+        // ]).render
         return response
     }
+
+    struct ShowView: HTMLView {
+        let id: String
+
+        var render: String {
+            return HTML5(head: [], body: [
+                H1("Showing User"),
+                Div("User ID: \(id)"),
+            ]).render
+        }
+    }
 }
+

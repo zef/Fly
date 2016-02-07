@@ -120,20 +120,3 @@ extension Tag {
     }
 
 }
-
-//extension Tag: StringLiteralConvertible {
-//    public typealias UnicodeScalarLiteralType = StringLiteralType
-//    public init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
-//        self.init(stringLiteral: value)
-//    }
-//
-//    public typealias ExtendedGraphemeClusterLiteralType = StringLiteralType
-//    public init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
-//        self.init(stringLiteral: value)
-//    }
-//
-//    public init(stringLiteral value: StringLiteralType) {
-//        self.init("", attributes: [:], [value])
-//    }
-//}
-//
