@@ -20,7 +20,8 @@ extension App {
         struct HomeView: HTMLView {
             var render: String {
                 return HTML5(head: [], body: [
-                    H1("Welcome Home.")
+                    H1("Fly"),
+                    H3("A web framework for Swift."),
                 ]).render
             }
         }

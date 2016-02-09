@@ -1,4 +1,4 @@
-print("Let's fly 🛩")
+App.log("Let's fly 🛩")
 
 let app = App(config: Config())
 let server: FlyServer.Type = HTTP4SwiftServer.self

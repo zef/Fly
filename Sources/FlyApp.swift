@@ -1,3 +1,4 @@
+import Foundation
 
 protocol FlyApp: class {
     var config: FlyConfig { get set }
@@ -21,6 +22,14 @@ class App: FlyApp {
 
     var environment: Environment {
         return config.environment
+    }
+
+    static let standardOutput = NSFileHandle.fileHandleWithStandardOutput()
+    static func log(values: Any...) {
+        let string = values.map { "\($0)" }.joinWithSeparator(" ")
+        if let data = "\n\(string)".dataUsingEncoding(NSUTF8StringEncoding) {
+            standardOutput.writeData(data)
+        }
     }
 }
 

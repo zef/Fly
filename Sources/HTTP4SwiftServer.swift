@@ -38,7 +38,7 @@ struct HTTP4SwiftServer: FlyServer {
                 response.body = "Page Not Found"
             }
         }
-        print("Received request:", request.method, request.path, "-> \(response.status)")
+        App.log("Received request:", request.method, request.path, "-> \(response.status)")
         // print("in \(time.timeIntervalSinceNow)")
         return (response.status.rawValue, "OK", response.body)
     }
