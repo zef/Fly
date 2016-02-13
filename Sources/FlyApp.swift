@@ -38,21 +38,30 @@ class App: FlyApp {
     static func log(values: Any...) {
         let string = values.map { "\($0)" }.joinWithSeparator(" ")
         print(string)
-        // let filePath = "logs/\(environment.string).log"
-        let filePath = "\(logDirectory)/development.log"
-        do {
-            try NSFileManager.defaultManager().createDirectoryAtPath(logDirectory, withIntermediateDirectories: true, attributes: nil)
-        } catch let error as NSError {
-            print("could not create log directory", error);
-        }
+        logToFile(string)
+    }
 
-        if let outputStream = NSOutputStream(toFileAtPath: filePath, append: true) {
-            outputStream.open()
-            outputStream.write(string + "\n")
-            outputStream.close()
-        } else {
-            print("Unable to open log file")
-        }
+    static func logToFile(string: String) {
+        #if os(OSX)
+            // let filePath = "logs/\(environment.string).log"
+            let filePath = "\(logDirectory)/development.log"
+            do {
+                try NSFileManager.defaultManager().createDirectoryAtPath(logDirectory, withIntermediateDirectories: true, attributes: nil)
+            } catch let error as NSError {
+                print("could not create log directory", error);
+            }
+
+            if let outputStream = NSOutputStream(toFileAtPath: filePath, append: true) {
+                outputStream.open()
+                outputStream.write(string + "\n")
+                outputStream.close()
+            } else {
+                print("Unable to open log file")
+            }
+        #elseif os(Linux)
+            // TODO
+        #endif
+
     }
 }
 
