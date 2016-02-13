@@ -1,6 +1,18 @@
 import Foundation
 
-func run(commands: String..., longRunning: Bool = false) {
+func run(commands: String..., longRunning: Bool = false, noWait: Bool = false) {
+    func printFileData(fileHandle: NSFileHandle) -> Bool {
+        let data = fileHandle.availableData
+        if data.length > 0 {
+            if let output = NSString(data: data, encoding: NSUTF8StringEncoding) {
+               print(output, terminator: "")
+            }
+            return true
+        } else {
+            return false
+        }
+    }
+
     print("Executing command \"\(commands.joinWithSeparator(" "))\":")
 
     let task = NSTask()
@@ -18,27 +30,26 @@ func run(commands: String..., longRunning: Bool = false) {
 
     if longRunning {
         fileHandle.waitForDataInBackgroundAndNotify()
+        printFileData(fileHandle)
+
         var observer: NSObjectProtocol!
         observer = NSNotificationCenter.defaultCenter().addObserverForName(NSFileHandleDataAvailableNotification, object: fileHandle, queue: nil) {  notification -> Void in
-            let data = fileHandle.availableData
-            if data.length > 0 {
-               if let output = NSString(data: data, encoding: NSUTF8StringEncoding) {
-                   print(output, terminator: "")
-               }
-               fileHandle.waitForDataInBackgroundAndNotify()
+            if printFileData(fileHandle) {
+                fileHandle.waitForDataInBackgroundAndNotify()
             } else {
-               // print("Landed", observer)
+               print("\nLanded", observer)
                NSNotificationCenter.defaultCenter().removeObserver(observer)
             }
         }
+        CFRunLoopRun()
     } else {
-        if let output = NSString(data: fileHandle.availableData, encoding: NSUTF8StringEncoding) {
-            print(output, terminator: "")
+        printFileData(fileHandle)
+        if !noWait {
+            task.waitUntilExit()
         }
-        task.waitUntilExit()
     }
 
-    print("end of command \"\(commands.joinWithSeparator(" "))\"")
+    print("end: \"\(commands.joinWithSeparator(" "))\"")
 
     // let status = task.terminationStatus
     // print(status)
@@ -55,8 +66,9 @@ enum Command: String {
         switch self {
         case .server:
             run("swift", "build")
-            run(".build/debug/Fly", longRunning: true)
-            CFRunLoopRun()
+            // run(".build/debug/Fly", longRunning: true)
+            run(".build/debug/Fly", noWait: true)
+            run("tail", "-fn0", "log/development.log", longRunning: true)
         case .docker:
             run("docker rm swift")
             run("docker build -t swift ./")
@@ -69,6 +81,11 @@ enum Command: String {
         }
     }
 
+}
+
+signal(SIGINT) { signal in
+    print("So long...")
+    exit(0)
 }
 
 let arguments = Process.arguments[1..<Process.arguments.count]
