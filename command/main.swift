@@ -1,6 +1,10 @@
 import Foundation
 
-func run(commands: String..., longRunning: Bool = false, noWait: Bool = false) {
+var tasksToKill = [NSTask]()
+
+// not super happy with a lot of stuff here, especially tasksToKill and the longRunning / wait options.
+func run(commands: String..., message: String? = nil, longRunning: Bool = false, wait: Bool = true) {
+
     func printFileData(fileHandle: NSFileHandle) -> Bool {
         let data = fileHandle.availableData
         if data.length > 0 {
@@ -13,14 +17,15 @@ func run(commands: String..., longRunning: Bool = false, noWait: Bool = false) {
         }
     }
 
-    print("Executing command \"\(commands.joinWithSeparator(" "))\":")
+    if let message = message {
+        print(message)
+    }
 
     let task = NSTask()
     // task.launchPath = "/bin/sh"
     // task.arguments = ["-c", command]
     task.launchPath = "/usr/bin/env"
     task.arguments = commands
-
 
     let pipe = NSPipe()
     task.standardOutput = pipe
@@ -37,19 +42,18 @@ func run(commands: String..., longRunning: Bool = false, noWait: Bool = false) {
             if printFileData(fileHandle) {
                 fileHandle.waitForDataInBackgroundAndNotify()
             } else {
-               print("\nLanded", observer)
                NSNotificationCenter.defaultCenter().removeObserver(observer)
             }
         }
         CFRunLoopRun()
     } else {
-        printFileData(fileHandle)
-        if !noWait {
+        if wait {
+            printFileData(fileHandle)
             task.waitUntilExit()
+        } else {
+            tasksToKill.append(task)
         }
     }
-
-    print("end: \"\(commands.joinWithSeparator(" "))\"")
 
     // let status = task.terminationStatus
     // print(status)
@@ -65,16 +69,15 @@ enum Command: String {
     func execute() {
         switch self {
         case .server:
-            run("swift", "build")
-            // run(".build/debug/Fly", longRunning: true)
-            run(".build/debug/Fly", noWait: true)
+            run("swift", "build", message: "Building...")
+            run(".build/debug/Fly", wait: false)
             run("tail", "-fn0", "log/development.log", longRunning: true)
         case .docker:
             run("docker rm swift")
-            run("docker build -t swift ./")
+            run("docker build -t swift ./", message: "Building Docker container...")
             run("docker run -p 80:8080 --name swift -it swift /bin/bash")
         case .clean:
-            run("swift", "build", "--clean")
+            run("swift", "build", "--clean", message: "Cleaning...")
         case .help:
             print("Help.")
             print("I should really find a nice command line lib to help me generate this...")
@@ -84,7 +87,10 @@ enum Command: String {
 }
 
 signal(SIGINT) { signal in
-    print("So long...")
+    print("\n🛬 ")
+    for task in tasksToKill {
+        task.terminate()
+    }
     exit(0)
 }
 
