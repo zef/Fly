@@ -40,8 +40,8 @@ protocol Routable {
 }
 
 protocol RequestHandler {
-    typealias Request: Routable
-    typealias Response
+    associatedtype Request: Routable
+    associatedtype Response
 
     // returned response when no routes match
     static var defaultResponse: Response { get }
