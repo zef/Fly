@@ -138,16 +138,3 @@ struct HTML5: HTMLView {
         return doctype + template.htmlString
     }
 }
-
-extension HasHTML {
-    public func Link(to location: String, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes(), _ content: [HTMLElement]) -> Tag {
-        var attributes = attributes
-        attributes["href"] = location
-        return Tag("a", id: id, classes: classes, data: data, attributes: attributes, content)
-    }
-    public func Link(to location: String, _ content: HTMLElement, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil,  attributes: HTMLAttributes = HTMLAttributes()) -> Tag {
-        var attributes = attributes
-        attributes["href"] = location
-        return Tag("a", id: id, classes: classes, data: data, attributes: attributes, [content])
-    }
-}

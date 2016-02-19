@@ -35,7 +35,7 @@ struct HTTPRoute: RequestHandler, HTTPRoutable, HTMLPrintableRoute {
         var render: String {
             var pathString = path
             if method == .GET {
-                pathString = Link(to: path, path).htmlString
+                pathString = Link(path, to: path).htmlString
             }
             return "\(method) \(pathString)"
         }

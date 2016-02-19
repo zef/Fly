@@ -35,29 +35,28 @@ struct TagDefinition {
     var methodDefinition: String {
         var def = ""
 
-        let args = TagDefinition.defaultArguments
+        let args = allArguments
         if isVoid {
             // def.addLine("public func \(tag.capitalizedString)(id id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes()) -> Tag {")
-            def.addLine("public func \(tag.capitalizedString)(\(Argument.constructString(args))) -> Tag {")
+            def.addLine("public func \(functionName)(\(Argument.constructString(args))) -> Tag {")
+            def += Argument.attributeCombinationCode(args)
             def.addLine("return Tag(\(tag.quoted), \"\", id: id, classes: classes, data: data, attributes: attributes)", indent: 1)
             def.addLine("}")
         } else {
-            var contentArg = Argument(label: "content", type: "[HTMLElement]", isOptional: false, defaultValue: nil, requireLabel: false, addToAttributes: false)
+            var contentArg = Argument(label: "content", type: "[HTMLElement]", isOptional: false, defaultValue: nil, requireLabel: false, addToAttributesAs: nil)
             var contentSuffixArgs = args
             contentSuffixArgs.append(contentArg)
 
-            def.addLine("public func \(tag.capitalizedString)(\(Argument.constructString(contentSuffixArgs))) -> Tag {")
+            def.addLine("public func \(functionName)(\(Argument.constructString(contentSuffixArgs))) -> Tag {")
+            def += Argument.attributeCombinationCode(args)
             def.addLine("return Tag(\(tag.quoted), id: id, classes: classes, data: data, attributes: attributes, content)", indent: 1)
             def.addLine("}")
-
-            // var attributes = attributes
-            // // for
-            // "attributes[\"\(argument.label)\"] = \(argument.label)"
 
             var contentPrefixArgs = args
             contentArg.type = "HTMLElement"
             contentPrefixArgs.insert(contentArg, atIndex: 0)
-            def.addLine("public func \(tag.capitalizedString)(\(Argument.constructString(contentPrefixArgs))) -> Tag {")
+            def.addLine("public func \(functionName)(\(Argument.constructString(contentPrefixArgs))) -> Tag {")
+            def += Argument.attributeCombinationCode(args)
             def.addLine("return Tag(\(tag.quoted), id: id, classes: classes, data: data, attributes: attributes, [content])", indent: 1)
             def.addLine("}")
         }
@@ -68,13 +67,19 @@ struct TagDefinition {
         return def
     }
 
+    var allArguments: [Argument] {
+        var args = arguments
+        args.appendContentsOf(TagDefinition.defaultArguments)
+        return args
+    }
+
 
     static var defaultArguments: [Argument] {
         return [
-            Argument(label: "id", type: "String", isOptional: true, defaultValue: "nil", requireLabel: true, addToAttributes: false),
-            Argument(label: "classes", type: "[String]", isOptional: true, defaultValue: "nil", requireLabel: true, addToAttributes: false),
-            Argument(label: "data", type: "HTMLAttributes", isOptional: true, defaultValue: "nil", requireLabel: true, addToAttributes: false),
-            Argument(label: "attributes", type: "HTMLAttributes", isOptional: false, defaultValue: "HTMLAttributes()", requireLabel: true, addToAttributes: false)
+            Argument(label: "id", type: "String", isOptional: true, defaultValue: "nil", requireLabel: true, addToAttributesAs: nil),
+            Argument(label: "classes", type: "[String]", isOptional: true, defaultValue: "nil", requireLabel: true, addToAttributesAs: nil),
+            Argument(label: "data", type: "HTMLAttributes", isOptional: true, defaultValue: "nil", requireLabel: true, addToAttributesAs: nil),
+            Argument(label: "attributes", type: "HTMLAttributes", isOptional: false, defaultValue: "HTMLAttributes()", requireLabel: true, addToAttributesAs: nil)
         ]
     }
 }
@@ -86,7 +91,7 @@ struct Argument {
     var defaultValue: String?
     var requireLabel = true
 
-    var addToAttributes = false
+    var addToAttributesAs: String? = nil
 
     func string(isFirstArgument: Bool) -> String {
         var prefixString = ""
@@ -100,7 +105,6 @@ struct Argument {
             }
         }
 
-
         let optionalString = isOptional ? "?" : ""
         var defaultString = ""
         if let defaultValue = defaultValue {
@@ -108,6 +112,19 @@ struct Argument {
         }
 
         return "\(prefixString)\(label): \(type)\(optionalString)\(defaultString)"
+    }
+
+
+    static func attributeCombinationCode(arguments: [Argument]) -> String {
+        var code = ""
+        let arguments = arguments.filter { $0.addToAttributesAs != nil }
+        if !arguments.isEmpty {
+            code.addLine("var attributes = attributes", indent: 1)
+            for argument in arguments {
+                code.addLine("attributes[\"\(argument.addToAttributesAs!)\"] = \(argument.label)", indent: 1)
+            }
+        }
+        return code
     }
 
     static func constructString(arguments: [Argument]) -> String {
@@ -126,18 +143,23 @@ struct Argument {
 // a link img video input
 
 let customTags = [
-    // TagDefinition(functionName: "Link", tag: "a", arguments: [
-    //     Argument(label: "to", type: "String", isOptional: false, defaultValue: nil, requireLabel: true, addToAttributes: true)
-    // ])
-    // "a": TagConfig(function: "Link", , type: "a")
-    // "link":
+    TagDefinition(functionName: "Link", tag: "a", arguments: [
+        Argument(label: "to", type: "String", isOptional: false, defaultValue: nil, requireLabel: true, addToAttributesAs: "href"),
+        Argument(label: "target", type: "String", isOptional: true, defaultValue: "nil", requireLabel: true, addToAttributesAs: "target")
+    ]),
+    TagDefinition(functionName: "Img", tag: "img", arguments: [
+        Argument(label: "src", type: "String", isOptional: false, defaultValue: nil, requireLabel: true, addToAttributesAs: "src"),
+        Argument(label: "alt", type: "String", isOptional: false, defaultValue: "\"\"", requireLabel: true, addToAttributesAs: "alt")
+    ])
     // "input": "type"
-    // "img": "src", "alt"
+    // text|password|checkbox|radio|submit|reset|file|hidden|image|button
+
+    // "link":
+
     // "video":
     // "script":
 ]
 
-// text|password|checkbox|radio|submit|reset|file|hidden|image|button
 
 let basicTagGroups = [
     "html head body",
@@ -152,9 +174,9 @@ let basicTagGroups = [
 var tags = basicTagGroups.reduce([TagDefinition]()) { tags, group in
     var tags = tags
     tags.appendContentsOf(group.componentsSeparatedByString(" ").map { TagDefinition(functionName: $0.capitalizedString, tag: $0, arguments: []) } )
-    // tags.appendContentsOf(customTags)
     return tags
 }
+tags.appendContentsOf(customTags)
 
 var code = "// This file is auto-generated, editing by hand is not recommended"
 code.addLine("")

@@ -211,4 +211,26 @@ extension HasHTML {
         return Tag("hr", "", id: id, classes: classes, data: data, attributes: attributes)
     }
 
+
+    public func Link(to to: String, target: String? = nil, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes(), _ content: [HTMLElement]) -> Tag {
+        var attributes = attributes
+        attributes["href"] = to
+        attributes["target"] = target
+        return Tag("a", id: id, classes: classes, data: data, attributes: attributes, content)
+    }
+    public func Link(content: HTMLElement, to: String, target: String? = nil, id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes()) -> Tag {
+        var attributes = attributes
+        attributes["href"] = to
+        attributes["target"] = target
+        return Tag("a", id: id, classes: classes, data: data, attributes: attributes, [content])
+    }
+
+
+    public func Img(src src: String, alt: String = "", id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes()) -> Tag {
+        var attributes = attributes
+        attributes["src"] = src
+        attributes["alt"] = alt
+        return Tag("img", "", id: id, classes: classes, data: data, attributes: attributes)
+    }
+
 }
