@@ -37,7 +37,6 @@ struct TagDefinition {
 
         let args = allArguments
         if isVoid {
-            // def.addLine("public func \(tag.capitalizedString)(id id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil, attributes: HTMLAttributes = HTMLAttributes()) -> Tag {")
             def.addLine("public func \(functionName)(\(Argument.constructString(args))) -> Tag {")
             def += Argument.attributeCombinationCode(args)
             def.addLine("return Tag(\(tag.quoted), \"\", id: id, classes: classes, data: data, attributes: attributes)", indent: 1)
@@ -61,7 +60,7 @@ struct TagDefinition {
             def.addLine("}")
         }
 
-        // id: String? = nil, classes: [String]? = nil, data: HTMLAttributes? = nil,  attributes: HTMLAttributes = HTMLAttributes()
+        // TODO generate static funcs too...
 
         def.addLine("")
         return def
@@ -136,8 +135,6 @@ struct Argument {
         return strings.joinWithSeparator(", ")
     }
 }
-
-
 
 // to handle manually:
 // a link img video input
