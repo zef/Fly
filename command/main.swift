@@ -74,8 +74,8 @@ enum Command: String {
             run("tail", "-fn0", "log/development.log", longRunning: true)
         case .docker:
             run("docker rm swift")
-            run("docker build -t swift ./", message: "Building Docker container...")
-            run("docker run -p 80:8080 --name swift -it swift /bin/bash")
+            run("docker", "build", "-t", "swift", "./", message: "Building Docker container...")
+            run("docker", "run", "-p", "80:8080", "--name", "swift", "-it", "swift", "/bin/bash")
         case .clean:
             run("swift", "build", "--clean", message: "Cleaning...")
         case .help:
