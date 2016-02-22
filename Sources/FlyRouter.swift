@@ -1,7 +1,7 @@
 typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
 extension FlyRequest: Routable {}
 
-struct HTTPRoute: RequestHandler, HTTPRoutable, HTMLPrintableRoute {
+struct HTTPRoute: RequestHandler, HTTPRoutable {
     typealias Request = FlyRequest
     typealias Response = FlyResponse
 
@@ -27,23 +27,6 @@ struct HTTPRoute: RequestHandler, HTTPRoutable, HTMLPrintableRoute {
     func validMatch(request: Request, data: [String: String]) -> Bool {
         return method == request.method
     }
-
-    struct LinkView: HTMLView {
-        let path: String
-        let method: HTTPMethod
-
-        var render: String {
-            var pathString = path
-            if method == .GET {
-                pathString = Link(path, to: path).htmlString
-            }
-            return "\(method) \(pathString)"
-        }
-    }
-
-    var htmlString: String {
-        return LinkView(path: path, method: method).render
-    }
 }
 
 protocol HTTPRoutable {
@@ -66,24 +49,34 @@ protocol HTMLPrintableRoute {
     var htmlString: String { get }
 }
 
-struct RouteView: HTMLView {
-    let routes: [HTMLPrintableRoute]
+extension FlyRouter: HasHTML { }
+extension FlyRouter where Route: HTMLPrintableRoute {
 
-    var render: String {
-        let listElements = routes.map { Li($0.htmlString) as HTMLElement }
-
+    var HTMLRouteList: String {
         return HTML5(head: [], body: [
             H2("Route not found, how about one of these?"),
-            Ul(listElements)
+            Ul(routes.map { Li($0.htmlString) })
         ]).render
     }
 }
 
-extension FlyRouter where Route: HTMLPrintableRoute {
+extension HTTPRoute: HTMLPrintableRoute {
 
-    var HTMLRouteList: String {
-        let printableRoutes = routes.map { $0 as HTMLPrintableRoute }
-        return RouteView(routes: printableRoutes).render
+    struct LinkView: HTMLView {
+        let path: String
+        let method: HTTPMethod
+
+        var render: String {
+            var pathString = path
+            if method == .GET {
+                pathString = Link(path, to: path).htmlString
+            }
+            return "\(method) \(pathString)"
+        }
+    }
+
+    var htmlString: String {
+        return LinkView(path: path, method: method).render
     }
 }
 
