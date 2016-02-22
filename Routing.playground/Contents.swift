@@ -152,6 +152,28 @@ print("")
 print("all registered routes:\n", stringRouter.friendlyRouteList)
 
 
+struct Transformer<In, Out> {
+    typealias ForwardTransformation = In -> Out
+    typealias ReverseTransformation = Out -> In
+
+    let transform: ForwardTransformation
+    let reverse: ReverseTransformation?
+
+    init(_ forward: ForwardTransformation) {
+        self.transform = forward
+        self.reverse = nil
+    }
+
+    init(_ forward: ForwardTransformation, reverse: ReverseTransformation) {
+        self.transform = forward
+        self.reverse = reverse
+    }
+
+    var canReverse: Bool {
+        return reverse != nil
+    }
+}
+
 // argument extraction/validation
 struct ParamParser<Result> {
     let parse: ([String: String]) -> Result?
@@ -160,6 +182,17 @@ struct ParamParser<Result> {
 enum Action: String {
     case watch, buy, preview
 }
+
+
+struct ParamTransform<Out> {
+    let process: String -> Out
+}
+
+let actionTransform = ParamTransform { actionString in
+    return Action(rawValue: actionString)
+}
+
+actionTransform.process("buy")
 
 typealias MovieDetailActionData = (guid: Int, action: Action)
 let movieDetailParser = ParamParser<MovieDetailActionData>() { data in
@@ -178,4 +211,36 @@ stringRouter.register(
 stringRouter.handle("/movie/1234/nothing")
 stringRouter.handle("/movie/1234/watch")
 
+struct ParsedRoute<ParsedType>: RequestHandler {
+    typealias Request = String
+    typealias Response = Bool
 
+    let path: String
+    let parser: ParamParser<ParsedType>
+//    let action: (request: Request, params: [String: String]) -> Response
+    let action: (request: Request, params: ParsedType) -> Response
+
+    static var defaultResponse: Response {
+        return false
+    }
+
+    func respond(request: Request, params: [String: String]) -> Response {
+        let parsedParams = parser.parse(params)!
+        return action(request: request, params: parsedParams)
+    }
+
+}
+//(key: "id")
+
+var parsedRouter = Router<ParsedRoute<MovieDetailActionData>>()
+
+// I'd really like to move the parser logic into the routing itself, but I can't think of a way to make that work
+// given that a collection of routes has to be a concrete type, and can't be made up of routes that
+// have disparate types returned by the parser... Would love to find a solution that would allow for
+// something more like the following instead of having to manually perform the parsing in each action block
+parsedRouter.register(
+    ParsedRoute(path: "/movie/:guid/:action", parser: movieDetailParser, action: { request, params in
+        print("Matched movie detail route:", params.guid, params.action)
+        return true
+    })
+)
