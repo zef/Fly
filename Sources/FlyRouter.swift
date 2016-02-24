@@ -35,7 +35,7 @@ extension FlyRouter where Route: HTTPRoutable {
         register(route)
     }
 
-    mutating func GET(path: String, action: FlyAction) {
+    mutating func get(path: String, action: FlyAction) {
         self.route(path, method: .GET, action: action)
     }
 }

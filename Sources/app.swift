@@ -9,7 +9,7 @@ extension App {
         router.route("/users/create", method: .POST, action: UserController.create)
 
         // not sure I like the .GET thing:
-        router.GET("/welcome") { request, response in
+        router.get("/welcome") { request, response in
             return "Welcome to our web page"
         }
 

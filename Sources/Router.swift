@@ -61,6 +61,7 @@ extension RequestHandler {
         return self.path
     }
 
+    // intended to be overridden by Request types that implement additional matching logic
     func validMatch(request: Request, data: [String: String]) -> Bool {
         return true
     }
