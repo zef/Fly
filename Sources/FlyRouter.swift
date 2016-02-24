@@ -20,10 +20,6 @@ struct HTTPRoute: RequestHandler, HTTPRoutable {
         return action(request, response)
     }
 
-    var friendlyString: String {
-        return "\(method.rawValue) \(path)"
-    }
-
     func validMatch(request: Request, data: [String: String]) -> Bool {
         return method == request.method
     }
