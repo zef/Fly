@@ -5,6 +5,20 @@ This is the beginning of some ideas for a Swift web framework intended to be run
 Adapters for the server component are implemented for [http4swift](https://github.com/takebayashi/http4swift) and [Zewo's
 Epoch](https://github.com/Zewo/Epoch). Epoch only compiles on linux, so it is currently disabled.
 
+## What makes Fly special?
+
+- Application code is decoupled from server implementation.
+  This is also true of other areas in Fly, but at this point in the evolution of
+  Swift web frameworks, this is especially important for the HTTP server layer.
+- The Swift compiler is strongly relied upon for as much as possible. Every use of `String` in the framework
+  introduces the potential for bugs that cannot be caught by the compiler.
+- Router is built on generics, making it usable in many contexts. The `Request` and `Response` objects
+  can be any type, so in the context of an iOS app for deep linking into the app,
+  you might use a `String` as the Request, and a `Bool` as the response, simply indicating success or failure.
+- Build HTML views directly in Swift. We'll see if this is a good idea long-term, but I find this preferable to
+  existing Swift templating solutions like mustache.
+- Comes with a `fly` command line tool that assists in development, similar to `rails`.
+
 
 ## Goals
 
