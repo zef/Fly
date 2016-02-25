@@ -67,14 +67,14 @@ extension RequestHandler {
     }
 
     func dataFromPath(requestPath: String) -> [String: String]? {
-        let templateComponents = path.characters.split("/").map{ String($0) }
-        let pathComponents = requestPath.characters.split("/").map{ String($0) }
+        let templateComponents = path.unicodeScalars.split("/").map(String.init)
+        let pathComponents = requestPath.unicodeScalars.split("/").map(String.init)
 
         guard templateComponents.count == pathComponents.count else { return nil }
 
         let valueIdentifiers = templateComponents.reduce([String]()) { result, component in
             var result = result
-            if component.characters.first == ":" {
+            if component.hasPrefix(":") {
                 result.append(component)
             }
             return result
@@ -86,7 +86,7 @@ extension RequestHandler {
             guard index < pathComponents.endIndex else { return nil }
 
             if let valueIndex = valueIndices.indexOf(index) {
-                let key = String(valueIdentifiers[valueIndex].characters.dropFirst())
+                let key = String(valueIdentifiers[valueIndex].unicodeScalars.dropFirst())
                 data[key] = pathComponents[index]
             } else {
                 if component != pathComponents[index] {
