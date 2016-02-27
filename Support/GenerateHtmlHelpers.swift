@@ -60,9 +60,9 @@ struct TagDefinition {
             def.addLine("}")
         }
 
-        // TODO generate static funcs too...
-
+        def += def.stringByReplacingOccurrencesOfString("public func", withString: "public static func")
         def.addLine("")
+
         return def
     }
 
