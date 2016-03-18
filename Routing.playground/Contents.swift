@@ -176,13 +176,13 @@ struct Transformer<In, Out> {
 
 // argument extraction/validation
 struct ParamParser<Result> {
+//    let mapping: [String: Result]
     let parse: ([String: String]) -> Result?
 }
 
 enum Action: String {
     case watch, buy, preview
 }
-
 
 struct ParamTransform<Out> {
     let process: String -> Out
@@ -194,12 +194,14 @@ let actionTransform = ParamTransform { actionString in
 
 actionTransform.process("buy")
 
-typealias MovieDetailActionData = (guid: Int, action: Action)
-let movieDetailParser = ParamParser<MovieDetailActionData>() { data in
+//typealias MovieDetailActionData = (guid: Int, action: Action)
+let movieDetailParser = ParamParser<(guid: Int, action: Action)>() { data in
     guard let guidString = data["guid"], guid = Int(guidString),
               actionString = data["action"], action = Action(rawValue: actionString) else { return nil }
     return (guid, action)
 }
+
+//typealias MovieDTA = movieDetailParser.resultType
 
 stringRouter.register(
     Route(path: "/movie/:guid/:action", action: { request, parameters in
@@ -232,7 +234,12 @@ struct ParsedRoute<ParsedType>: RequestHandler {
 }
 //(key: "id")
 
-var parsedRouter = Router<ParsedRoute<MovieDetailActionData>>()
+"/movie/1234/nothing".componentsSeparatedByString("/")
+"/movie/1234/nothing".unicodeScalars.split("/")
+//movieDetailParser.resultType
+
+//var parsedRouter = Router<ParsedRoute<movieDetailParser.ResultType>>()
+var parsedRouter = Router<ParsedRoute<(guid: Int, action: Action)>>()
 
 // I'd really like to move the parser logic into the routing itself, but I can't think of a way to make that work
 // given that a collection of routes has to be a concrete type, and can't be made up of routes that
@@ -244,3 +251,11 @@ parsedRouter.register(
         return true
     })
 )
+
+
+
+
+
+
+
+
