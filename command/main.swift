@@ -45,7 +45,6 @@ func run(commands: String..., message: String? = nil, longRunning: Bool = false,
                NSNotificationCenter.defaultCenter().removeObserver(observer)
             }
         }
-        CFRunLoopRun()
     } else {
         if wait {
             printFileData(fileHandle)
@@ -69,7 +68,7 @@ enum Command: String {
     func execute() {
         switch self {
         case .server:
-            run("swift", "build", message: "Building...")
+            run("swift", "build", message: "Building...", longRunning: true)
             run(".build/debug/Fly", wait: false)
             run("tail", "-fn0", "log/development.log", longRunning: true)
         case .docker:
@@ -103,4 +102,5 @@ if let command = Command(rawValue: commandString) {
     Command.help.execute()
 }
 
+CFRunLoopRun()
 
