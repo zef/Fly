@@ -21,7 +21,7 @@ struct NestResponse: ResponseType {
 
 extension FlyResponse {
     var nestResponse: NestResponse {
-        return NestResponse(body: body, statusLine: "\(status.rawValue) OK")
+        return NestResponse(body: body, statusLine: status.description)
     }
 }
 
@@ -34,7 +34,7 @@ struct HTTP4SwiftServer: FlyServer {
             let request = FlyRequest(path, method: method)
             var response = app.router.handle(request)
 
-            if response.status == .NotFound {
+            if response.status == 404 {
                 if app.config.showDebugRoutes {
                     response.body = app.router.HTMLRouteList
                 } else {

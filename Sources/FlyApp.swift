@@ -13,7 +13,7 @@ protocol FlyApp: class {
 extension FlyApp {
     func setup() { }
     func logRequest(request: FlyRequest, response: FlyResponse) {
-        App.log("\(request.method) \(request.path) -> \(response.status)")
+        App.log("\(request.method) \(request.path) -> \(response.status.description)")
     }
 
     static var logDirectory: String { return "log" }

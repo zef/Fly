@@ -16,7 +16,7 @@ struct FlyRequest {
 
 struct FlyResponse {
     var request: FlyRequest = FlyRequest("")
-    var status: HTTPStatus = .OK
+    var status: HTTPStatus = HTTPStatus.OK
     var body: String = ""
 
     init() { }

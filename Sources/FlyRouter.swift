@@ -10,7 +10,7 @@ struct HTTPRoute: RequestHandler, HTTPRoutable {
     let action: FlyAction
 
     static var defaultResponse: Response {
-        return FlyResponse(status: .NotFound)
+        return FlyResponse(status: HTTPStatus.NotFound)
     }
 
     func respond(request: Request, params: [String: String]) -> Response {
