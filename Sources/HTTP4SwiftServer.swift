@@ -24,7 +24,6 @@ struct HTTP4SwiftServer: FlyServer {
     }
 
     static func dataForRequest(app: FlyApp, request httpRequest: http4swift.HTTPRequest) -> (Int, String, String) {
-        // let time = NSDate()
         let path = httpRequest.path
         let method = HTTPMethod(rawValue: httpRequest.method) ?? .GET
 
@@ -38,8 +37,7 @@ struct HTTP4SwiftServer: FlyServer {
                 response.body = "Page Not Found"
             }
         }
-        App.log("Received request:", request.method, request.path, "-> \(response.status)")
-        // print("in \(time.timeIntervalSinceNow)")
+        app.logRequest(request, response: response)
         return (response.status.rawValue, "OK", response.body)
     }
 

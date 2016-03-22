@@ -6,11 +6,16 @@ protocol FlyApp: class {
     init(config: FlyConfig)
 
     // overrideable, but with default values
+    func logRequest(request: FlyRequest, response: FlyResponse)
     static var logDirectory: String { get }
 }
 
 extension FlyApp {
     func setup() { }
+    func logRequest(request: FlyRequest, response: FlyResponse) {
+        App.log("\(request.method) \(request.path) -> \(response.status)")
+    }
+
     static var logDirectory: String { return "log" }
 }
 
