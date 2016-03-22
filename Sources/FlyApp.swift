@@ -74,6 +74,8 @@ protocol FlyServer {
     static func start(app: FlyApp, port: Int)
 }
 
+
+#if os(OSX)
 // http://stackoverflow.com/questions/26989493/how-to-open-file-and-append-a-string-in-it-swift
 extension NSOutputStream {
 
@@ -108,4 +110,5 @@ extension NSOutputStream {
     }
 
 }
+#endif
 
