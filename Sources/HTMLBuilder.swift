@@ -50,7 +50,7 @@ public struct Tag: HTMLElement {
     }
 
     public var contentString: String {
-        return content.map { $0.htmlString }.joinWithSeparator("")
+        return content.map { $0.htmlString }.joined(separator: "")
     }
 
     private var attributeString: String {
@@ -72,7 +72,7 @@ public struct Tag: HTMLElement {
             }
         }
         if let classes = classes {
-            attributes["class"] = classes.joinWithSeparator(" ")
+            attributes["class"] = classes.joined(separator: " ")
         }
         if let id = id {
             attributes["id"] = id

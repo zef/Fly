@@ -41,7 +41,7 @@ class App: FlyApp {
     // }
 
     static func log(values: Any...) {
-        let string = values.map { "\($0)" }.joinWithSeparator(" ")
+        let string = values.map { "\($0)" }.joined(separator: " ")
         print(string)
         logToFile(string)
     }
@@ -51,7 +51,7 @@ class App: FlyApp {
             // let filePath = "logs/\(environment.string).log"
             let filePath = "\(logDirectory)/development.log"
             do {
-                try NSFileManager.defaultManager().createDirectoryAtPath(logDirectory, withIntermediateDirectories: true, attributes: nil)
+                try NSFileManager.defaultManager().createDirectory(atPath: logDirectory, withIntermediateDirectories: true, attributes: nil)
             } catch let error as NSError {
                 print("could not create log directory", error);
             }
@@ -85,7 +85,7 @@ extension NSOutputStream {
     ///
     /// - returns:                         Return total number of bytes written upon success. Return -1 upon failure.
     func write(string: String, encoding: NSStringEncoding = NSUTF8StringEncoding, allowLossyConversion: Bool = true) -> Int {
-        if let data = string.dataUsingEncoding(encoding, allowLossyConversion: allowLossyConversion) {
+        if let data = string.data(usingEncoding: encoding, allowLossyConversion: allowLossyConversion) {
             var bytes = UnsafePointer<UInt8>(data.bytes)
             var bytesRemaining = data.length
             var totalBytesWritten = 0

@@ -68,7 +68,7 @@ struct TagDefinition {
 
     var allArguments: [Argument] {
         var args = arguments
-        args.appendContentsOf(TagDefinition.defaultArguments)
+        args.append(contentsOf: TagDefinition.defaultArguments)
         return args
     }
 
@@ -128,11 +128,11 @@ struct Argument {
 
     static func constructString(arguments: [Argument]) -> String {
         var strings = [String]()
-        for (index, argument) in arguments.enumerate() {
+        for (index, argument) in arguments.enumerated {
             let isFirst = index == 0
             strings.append(argument.string(isFirst))
         }
-        return strings.joinWithSeparator(", ")
+        return strings.joined(separator: ", ")
     }
 }
 
@@ -170,10 +170,10 @@ let basicTagGroups = [
 
 var tags = basicTagGroups.reduce([TagDefinition]()) { tags, group in
     var tags = tags
-    tags.appendContentsOf(group.componentsSeparatedByString(" ").map { TagDefinition(functionName: $0.capitalizedString, tag: $0, arguments: []) } )
+    tags.append(contentsOf: group.componentsSeparatedByString(" ").map { TagDefinition(functionName: $0.capitalizedString, tag: $0, arguments: []) } )
     return tags
 }
-tags.appendContentsOf(customTags)
+tags.append(contentsOf: customTags)
 
 var code = "// This file is auto-generated, editing by hand is not recommended"
 code.addLine("")

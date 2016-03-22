@@ -12,7 +12,7 @@ struct FlyRouter<Route: RequestHandler> {
         register(routes)
     }
     mutating func register(routes: [Route]...) {
-        self.routes.appendContentsOf(routes.flatMap{$0})
+        self.routes.append(contentsOf: routes.flatMap{$0})
     }
 
     func handle(request: Route.Request) -> Route.Response {
@@ -31,7 +31,7 @@ struct FlyRouter<Route: RequestHandler> {
     }
 
     var friendlyRouteList: String {
-        return routes.map { return $0.friendlyString }.joinWithSeparator("\n")
+        return routes.map { return $0.friendlyString }.joined(separator: "\n")
     }
 }
 
@@ -67,8 +67,8 @@ extension RequestHandler {
     }
 
     func dataFromPath(requestPath: String) -> [String: String]? {
-        let templateComponents = path.unicodeScalars.split("/").map(String.init)
-        let pathComponents = requestPath.unicodeScalars.split("/").map(String.init)
+        let templateComponents = path.unicodeScalars.split(separator: "/").map(String.init)
+        let pathComponents = requestPath.unicodeScalars.split(separator: "/").map(String.init)
 
         guard templateComponents.count == pathComponents.count else { return nil }
 
@@ -79,13 +79,13 @@ extension RequestHandler {
             }
             return result
         }
-        let valueIndices = valueIdentifiers.flatMap { templateComponents.indexOf($0) }
+        let valueIndices = valueIdentifiers.flatMap { templateComponents.index(of: $0) }
 
         var data = [String: String]()
-        for (index, component) in templateComponents.enumerate() {
+        for (index, component) in templateComponents.enumerated() {
             guard index < pathComponents.endIndex else { return nil }
 
-            if let valueIndex = valueIndices.indexOf(index) {
+            if let valueIndex = valueIndices.index(of: index) {
                 let key = String(valueIdentifiers[valueIndex].unicodeScalars.dropFirst())
                 data[key] = pathComponents[index]
             } else {
