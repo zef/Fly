@@ -7,11 +7,6 @@
 
 FROM ubuntu:15.10
 
-# Latest Swift Version
-# https://swift.org/builds/swift-2.2-branch/ubuntu1510/swift-2.2-SNAPSHOT-2016-01-25-a/swift-2.2-SNAPSHOT-2016-01-25-a-ubuntu15.10.tar.gz
-# https://swift.org/builds/ubuntu1510/swift-2.2-SNAPSHOT-2016-01-25-a/swift-2.2-SNAPSHOT-2016-01-25-a-ubuntu15.10.tar.gz
-ENV SWIFT_VERSION 2.2-SNAPSHOT-2016-01-11-a
-ENV SWIFT_PLATFORM ubuntu15.10
 # Install Dependencies
 RUN apt-get update && \
     apt-get install -y \
@@ -25,9 +20,19 @@ RUN apt-get update && \
 RUN wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import - && \
     gpg --keyserver hkp://pool.sks-keyservers.net --refresh-keys Swift
 
+
+# Latest Swift Version
+# https://swift.org/builds/swift-2.2-branch/ubuntu1510/swift-2.2-SNAPSHOT-2016-03-01-a/swift-2.2-SNAPSHOT-2016-03-01-a-ubuntu15.10.tar.gz
+# https://swift.org/builds/development/ubuntu1510/swift-DEVELOPMENT-SNAPSHOT-2016-03-16-a/swift-DEVELOPMENT-SNAPSHOT-2016-03-16-a-ubuntu15.10.tar.gz
+#
+ENV SWIFT_BRANCH development
+# ENV SWIFT_BRANCH swift-2.2-branch
+ENV SWIFT_VERSION DEVELOPMENT-SNAPSHOT-2016-03-16-a
+ENV SWIFT_PLATFORM ubuntu15.10
+
 # Download and install Swift
 RUN SWIFT_ARCHIVE_NAME=swift-$SWIFT_VERSION-$SWIFT_PLATFORM && \
-    SWIFT_URL=https://swift.org/builds/swift-2.2-branch/$(echo "$SWIFT_PLATFORM" | tr -d .)/swift-$SWIFT_VERSION/$SWIFT_ARCHIVE_NAME.tar.gz && \
+    SWIFT_URL=https://swift.org/builds/$SWIFT_BRANCH/$(echo "$SWIFT_PLATFORM" | tr -d .)/swift-$SWIFT_VERSION/$SWIFT_ARCHIVE_NAME.tar.gz && \
     wget $SWIFT_URL && \
     wget $SWIFT_URL.sig && \
     gpg --verify $SWIFT_ARCHIVE_NAME.tar.gz.sig && \
