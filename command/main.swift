@@ -38,7 +38,7 @@ func run(commands: String..., message: String? = nil, longRunning: Bool = false,
         printFileData(fileHandle)
 
         var observer: NSObjectProtocol!
-        observer = NSNotificationCenter.defaultCenter().addObserverForName(NSFileHandleDataAvailableNotification, object: fileHandle, queue: nil) {  notification -> Void in
+        observer = NSNotificationCenter.defaultCenter().addObserver(forName: NSFileHandleDataAvailableNotification, object: fileHandle, queue: nil) {  notification -> Void in
             if printFileData(fileHandle) {
                 fileHandle.waitForDataInBackgroundAndNotify()
             } else {
