@@ -1,3 +1,5 @@
+import SwifTML
+
 typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
 extension FlyRequest: Routable {}
 
@@ -45,7 +47,7 @@ protocol HTMLPrintableRoute {
     var htmlString: String { get }
 }
 
-extension FlyRouter: HasHTML { }
+extension FlyRouter: SwifTML { }
 extension FlyRouter where Route: HTMLPrintableRoute {
 
     var HTMLRouteList: String {
