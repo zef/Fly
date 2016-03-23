@@ -25,12 +25,14 @@ Epoch](https://github.com/Zewo/Epoch). Epoch only compiles on linux, so it is cu
 - [Protocol-Oriented](https://developer.apple.com/videos/play/wwdc2015-408/). Components of Fly
   should be connected via protocols so that they can are useful outside of Fly, or can be replaced
   entirely by other libraries.
+- Concise, but not at the expense of clarity, flexibility, or advantageous use of the type system.
 - Compiler-focused. Fly attempts to lean heavily on the type system to reduce bugs and potential for
   errors by pushing as much as possible to the compiler. This means:
     - Avoiding throwing out type data by using `Any` and `AnyObject`
-    - Reducing the use of strings in subscripts for fetching data
-- Concise, but not at the expense of clarity and flexibility.
+    - Reducing the use of strings in subscripts for fetching data.
 
+**Each use of `String` in a framework or your application increases the surface areas for bugs
+that the compiler can't catch.**
 
 ## Ideas
 
