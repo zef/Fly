@@ -44,3 +44,7 @@ that the compiler can't catch.**
   configuration. Not sure this is a good idea, but interesting :)
 
 
+## Swift Version
+
+`DEVELOPMENT-SNAPSHOT-2016-03-24-a`
+
