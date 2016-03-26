@@ -1,3 +1,5 @@
+import HTTPStatus
+
 enum HTTPMethod: String {
     case GET, PUT, POST, DELETE
     // Patch?
