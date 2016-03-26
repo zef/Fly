@@ -1,3 +1,4 @@
+import AirTrafficController
 import SwifTML
 
 typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
@@ -25,13 +26,17 @@ struct HTTPRoute: RequestHandler, HTTPRoutable {
     func validMatch(request: Request, data: [String: String]) -> Bool {
         return method == request.method
     }
+
+    var description: String {
+        return "\(method) \(path)"
+    }
 }
 
 protocol HTTPRoutable {
     init(path: String, method: HTTPMethod, action: FlyAction)
 }
 
-extension FlyRouter where Route: HTTPRoutable {
+extension Router where Route: HTTPRoutable {
     mutating func route(path: String, method: HTTPMethod = .GET, action: FlyAction) {
         let route = Route(path: path, method: method, action: action)
         register(route)
@@ -47,8 +52,8 @@ protocol HTMLPrintableRoute {
     var htmlString: String { get }
 }
 
-extension FlyRouter: SwifTML { }
-extension FlyRouter where Route: HTMLPrintableRoute {
+extension Router: SwifTML { }
+extension Router where Route: HTMLPrintableRoute {
 
     var HTMLRouteList: String {
         return HTML5(head: [], body: [

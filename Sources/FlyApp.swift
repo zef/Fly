@@ -1,11 +1,12 @@
 import Foundation
+import AirTrafficController
 
 protocol FlyApp: class {
     var config: FlyConfig { get set }
-    var router: FlyRouter<HTTPRoute> { get }
+    var router: Router<HTTPRoute> { get }
     init(config: FlyConfig)
 
-    // overrideable, but with default values
+    // have default implementations, but can be overridden
     func logRequest(request: FlyRequest, response: FlyResponse)
     static var logDirectory: String { get }
 }
@@ -21,11 +22,11 @@ extension FlyApp {
 
 class App: FlyApp {
     var config: FlyConfig
-    var router: FlyRouter<HTTPRoute>
+    var router: Router<HTTPRoute>
 
     required init(config: FlyConfig) {
         self.config = config
-        self.router = FlyRouter()
+        self.router = Router()
         setup()
     }
 
