@@ -25,8 +25,8 @@ extension FlyResponse {
     }
 }
 
-struct HTTP4SwiftServer: FlyServer {
-    static func start(app: FlyApp, port: Int) {
+public struct HTTP4SwiftServer: FlyServer {
+    public static func start(app: FlyApp, port: Int) {
         let httpApp: Application = { (httpRequest) -> ResponseType in
             let path = httpRequest.path
             let method = HTTPMethod(rawValue: httpRequest.method) ?? .GET

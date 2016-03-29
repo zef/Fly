@@ -43,7 +43,7 @@ public protocol HTTPRoutable {
     init(path: String, method: HTTPMethod, action: FlyAction)
 }
 
-extension Router where Route: HTTPRoutable {
+public extension Router where Route: HTTPRoutable {
     mutating func route(path: String, method: HTTPMethod = .GET, action: FlyAction) {
         let route = Route(path: path, method: method, action: action)
         register(route)

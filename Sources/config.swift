@@ -27,7 +27,7 @@ public protocol FlyConfig {
     var showDebugRoutes: Bool { get }
 }
 
-extension FlyConfig {
+public extension FlyConfig {
     var environment: Environment { return .Production }
     var showDebugRoutes: Bool { return environment == Environment.Development }
 }
