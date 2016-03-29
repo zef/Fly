@@ -12,6 +12,7 @@ RUN apt-get update && \
     apt-get install -y \
         git \
         clang \
+        libxml2 \
         libicu55 \
         libpython2.7 \
         wget
@@ -24,10 +25,11 @@ RUN wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import - && \
 # Latest Swift Version
 # https://swift.org/builds/swift-2.2-branch/ubuntu1510/swift-2.2-SNAPSHOT-2016-03-01-a/swift-2.2-SNAPSHOT-2016-03-01-a-ubuntu15.10.tar.gz
 # https://swift.org/builds/development/ubuntu1510/swift-DEVELOPMENT-SNAPSHOT-2016-03-16-a/swift-DEVELOPMENT-SNAPSHOT-2016-03-16-a-ubuntu15.10.tar.gz
+# https://swift.org/builds/development/ubuntu1510/swift-DEVELOPMENT-SNAPSHOT-2016-03-24-a/swift-DEVELOPMENT-SNAPSHOT-2016-03-24-a-ubuntu15.10.tar.gz
 #
 ENV SWIFT_BRANCH development
 # ENV SWIFT_BRANCH swift-2.2-branch
-ENV SWIFT_VERSION DEVELOPMENT-SNAPSHOT-2016-03-16-a
+ENV SWIFT_VERSION DEVELOPMENT-SNAPSHOT-2016-03-24-a
 ENV SWIFT_PLATFORM ubuntu15.10
 
 # Download and install Swift
@@ -37,13 +39,13 @@ RUN SWIFT_ARCHIVE_NAME=swift-$SWIFT_VERSION-$SWIFT_PLATFORM && \
     wget $SWIFT_URL.sig && \
     gpg --verify $SWIFT_ARCHIVE_NAME.tar.gz.sig && \
     tar -xvzf $SWIFT_ARCHIVE_NAME.tar.gz -C / --strip 1 && \
-    rm -rf $SWIFT_ARCHIVE_NAME* /tmp/* /var/tmp/*
-
+    rm -rf /tmp/* /var/tmp/* && \
+    rm -rf $SWIFT_ARCHIVE_NAME*
 
 # For https://github.com/Zewo/Epoch
-RUN apt-get install -y software-properties-common
-RUN apt-get update && add-apt-repository 'deb [trusted=yes] http://apt.zewo.io/deb ./' | tee --append /etc/apt/sources.list
-RUN apt-get update && apt-get install -y --force-yes uri-parser http-parser libvenice
+# RUN apt-get install -y software-properties-common
+# RUN apt-get update && add-apt-repository 'deb [trusted=yes] http://apt.zewo.io/deb ./' | tee --append /etc/apt/sources.list
+# RUN apt-get update && apt-get install -y --force-yes uri-parser http-parser libvenice
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
