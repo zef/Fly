@@ -5,58 +5,58 @@ import HTTPStatus
 typealias FlyAction = (FlyRequest, FlyResponse) -> FlyResponse
 extension FlyRequest: Routable {}
 
-struct HTTPRoute: RequestHandler, HTTPRoutable {
+public struct HTTPRoute: RequestHandler, HTTPRoutable {
     typealias Request = FlyRequest
     typealias Response = FlyResponse
 
-    let path: String
-    let method: HTTPMethod
-    let action: FlyAction
+    public let path: String
+    public let method: HTTPMethod
+    public let action: FlyAction
 
-    static var defaultResponse: Response {
+    public static var defaultResponse: Response {
         return FlyResponse(status: HTTPStatus.NotFound)
     }
 
-    func respond(request: Request, params: [String: String]) -> Response {
+    public func respond(request: Request, params: [String: String]) -> Response {
         var (request, response) = (request, Response())
         request.parameters = params
         response.request = request
         return action(request, response)
     }
 
-    func validMatch(request: Request, data: [String: String]) -> Bool {
+    public func validMatch(request: Request, data: [String: String]) -> Bool {
         return method == request.method
     }
 
-    var description: String {
+    public var description: String {
         return "\(method) \(path)"
     }
 }
 
-protocol HTTPRoutable {
-    init(path: String, method: HTTPMethod, action: FlyAction)
+public protocol HTTPRoutable {
+    public init(path: String, method: HTTPMethod, action: FlyAction)
 }
 
-extension Router where Route: HTTPRoutable {
-    mutating func route(path: String, method: HTTPMethod = .GET, action: FlyAction) {
+public extension Router where Route: HTTPRoutable {
+    public mutating func route(path: String, method: HTTPMethod = .GET, action: FlyAction) {
         let route = Route(path: path, method: method, action: action)
         register(route)
     }
 
-    mutating func get(path: String, action: FlyAction) {
+    public mutating func get(path: String, action: FlyAction) {
         self.route(path, method: .GET, action: action)
     }
 }
 
 
-protocol HTMLPrintableRoute {
-    var htmlString: String { get }
+public protocol HTMLPrintableRoute {
+    public var htmlString: String { get }
 }
 
-extension Router: SwifTML { }
-extension Router where Route: HTMLPrintableRoute {
+public extension Router: SwifTML { }
+public extension Router where Route: HTMLPrintableRoute {
 
-    var HTMLRouteList: String {
+    public var HTMLRouteList: String {
         return HTML5(head: [], body: [
             H2("Route not found, how about one of these?"),
             Ul(routes.map { Li($0.htmlString) })
@@ -64,7 +64,7 @@ extension Router where Route: HTMLPrintableRoute {
     }
 }
 
-extension HTTPRoute: HTMLPrintableRoute {
+public extension HTTPRoute: HTMLPrintableRoute {
 
     struct LinkView: HTMLView {
         let path: String
@@ -79,7 +79,7 @@ extension HTTPRoute: HTMLPrintableRoute {
         }
     }
 
-    var htmlString: String {
+    public var htmlString: String {
         return LinkView(path: path, method: method).render
     }
 }

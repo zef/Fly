@@ -2,17 +2,17 @@ import Foundation
 import AirTrafficController
 
 
-class App: FlyApp {
-    var config: FlyConfig
-    var router: Router<HTTPRoute>
+public class App: FlyApp {
+    public var config: FlyConfig
+    public var router: Router<HTTPRoute>
 
-    required init(config: FlyConfig) {
+    public required init(config: FlyConfig) {
         self.config = config
         self.router = Router()
         setup()
     }
 
-    var environment: Environment {
+    public var environment: Environment {
         return config.environment
     }
 
@@ -23,13 +23,13 @@ class App: FlyApp {
     //     return
     // }
 
-    static func log(values: Any...) {
+    public static func log(values: Any...) {
         let string = values.map { "\($0)" }.joined(separator: " ")
         print(string)
         logToFile(string)
     }
 
-    static func logToFile(string: String) {
+    private static func logToFile(string: String) {
         #if os(OSX)
             // let filePath = "logs/\(environment.string).log"
             let filePath = "\(logDirectory)/development.log"
@@ -52,11 +52,6 @@ class App: FlyApp {
 
     }
 }
-
-protocol FlyServer {
-    static func start(app: FlyApp, port: Int)
-}
-
 
 #if os(OSX)
 // http://stackoverflow.com/questions/26989493/how-to-open-file-and-append-a-string-in-it-swift

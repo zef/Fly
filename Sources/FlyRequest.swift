@@ -1,31 +1,31 @@
 import HTTPStatus
 
-enum HTTPMethod: String {
+public enum HTTPMethod: String {
     case GET, PUT, POST, DELETE
     // Patch?
 }
 
-struct FlyRequest {
-    let path: String
-    let method: HTTPMethod
-    var parameters = [String: String]()
+public struct FlyRequest {
+    public let path: String
+    public let method: HTTPMethod
+    public var parameters = [String: String]()
 
-    init(_ path: String, method: HTTPMethod = .GET) {
+    public init(_ path: String, method: HTTPMethod = .GET) {
         self.path = path
         self.method = method
     }
 }
 
-struct FlyResponse {
-    var request: FlyRequest = FlyRequest("")
-    var status: HTTPStatus = HTTPStatus.OK
-    var body: String = ""
+public struct FlyResponse {
+    public var request: FlyRequest = FlyRequest("")
+    public var status: HTTPStatus = HTTPStatus.OK
+    public var body: String = ""
 
-    init() { }
-    init(status: HTTPStatus) {
+    public init() { }
+    public init(status: HTTPStatus) {
         self.status = status
     }
-    init(body: String) {
+    public init(body: String) {
         self.body = body
     }
 }

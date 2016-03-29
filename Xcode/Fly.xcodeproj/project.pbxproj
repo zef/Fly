@@ -15,9 +15,7 @@
 		8D71BCCD1C76DC2800F492C2 /* FlyRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D71BCC11C76DC2800F492C2 /* FlyRequest.swift */; };
 		8D71BCCE1C76DC2800F492C2 /* FlyRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D71BCC21C76DC2800F492C2 /* FlyRouter.swift */; };
 		8D71BCD11C76DC2800F492C2 /* HTTP4SwiftServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D71BCC51C76DC2800F492C2 /* HTTP4SwiftServer.swift */; };
-		8D71BCD21C76DC2800F492C2 /* HTTPStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D71BCC61C76DC2800F492C2 /* HTTPStatus.swift */; };
 		8D71BCD31C76DC2800F492C2 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D71BCC71C76DC2800F492C2 /* main.swift */; };
-		8D71BCD41C76DC2800F492C2 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D71BCC81C76DC2800F492C2 /* Router.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,9 +29,7 @@
 		8D71BCC11C76DC2800F492C2 /* FlyRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlyRequest.swift; sourceTree = "<group>"; };
 		8D71BCC21C76DC2800F492C2 /* FlyRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlyRouter.swift; sourceTree = "<group>"; };
 		8D71BCC51C76DC2800F492C2 /* HTTP4SwiftServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTP4SwiftServer.swift; sourceTree = "<group>"; };
-		8D71BCC61C76DC2800F492C2 /* HTTPStatus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPStatus.swift; sourceTree = "<group>"; };
 		8D71BCC71C76DC2800F492C2 /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		8D71BCC81C76DC2800F492C2 /* Router.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,9 +79,7 @@
 				8D71BCC11C76DC2800F492C2 /* FlyRequest.swift */,
 				8D71BCC21C76DC2800F492C2 /* FlyRouter.swift */,
 				8D71BCC51C76DC2800F492C2 /* HTTP4SwiftServer.swift */,
-				8D71BCC61C76DC2800F492C2 /* HTTPStatus.swift */,
 				8D71BCC71C76DC2800F492C2 /* main.swift */,
-				8D71BCC81C76DC2800F492C2 /* Router.swift */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -173,12 +167,10 @@
 				8D71BCD11C76DC2800F492C2 /* HTTP4SwiftServer.swift in Sources */,
 				8D71BCCA1C76DC2800F492C2 /* Config.swift in Sources */,
 				8D71BCCE1C76DC2800F492C2 /* FlyRouter.swift in Sources */,
-				8D71BCD41C76DC2800F492C2 /* Router.swift in Sources */,
 				8D71BCCB1C76DC2800F492C2 /* EpochServer.swift in Sources */,
 				8D71BCD31C76DC2800F492C2 /* main.swift in Sources */,
 				8D71BCCD1C76DC2800F492C2 /* FlyRequest.swift in Sources */,
 				8D71BCCC1C76DC2800F492C2 /* FlyApp.swift in Sources */,
-				8D71BCD21C76DC2800F492C2 /* HTTPStatus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
