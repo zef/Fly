@@ -11,7 +11,6 @@ public protocol FlyApp: class {
 }
 
 public extension FlyApp {
-    public func setup() { }
     public func logRequest(request: FlyRequest, response: FlyResponse) {
         App.log("\(request.method) \(request.path) -> \(response.status.description)")
     }

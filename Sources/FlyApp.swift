@@ -8,7 +8,6 @@ public class App: FlyApp {
     public required init(config: FlyConfig) {
         self.config = config
         self.router = Router()
-        setup()
     }
 
     public var environment: Environment {
