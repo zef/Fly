@@ -1,7 +1,6 @@
 import Foundation
 import AirTrafficController
 
-
 public class App: FlyApp {
     public var config: FlyConfig
     public var router: Router<HTTPRoute>

@@ -31,17 +31,17 @@ public struct FlyResponse {
 }
 
 extension FlyResponse: StringLiteralConvertible {
-    typealias UnicodeScalarLiteralType = StringLiteralType
-    init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
+    public typealias UnicodeScalarLiteralType = StringLiteralType
+    public init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
         self.init(stringLiteral: value)
     }
 
-    typealias ExtendedGraphemeClusterLiteralType = StringLiteralType
-    init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
+    public typealias ExtendedGraphemeClusterLiteralType = StringLiteralType
+    public init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
         self.init(stringLiteral: value)
     }
 
-    init(stringLiteral value: StringLiteralType) {
+    public init(stringLiteral value: StringLiteralType) {
         self.init(body: value)
     }
 }

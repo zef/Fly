@@ -1,3 +1,4 @@
+import AirTrafficController
 
 public protocol FlyApp: class {
     var config: FlyConfig { get set }
@@ -10,12 +11,12 @@ public protocol FlyApp: class {
 }
 
 public extension FlyApp {
-    func setup() { }
-    func logRequest(request: FlyRequest, response: FlyResponse) {
+    public func setup() { }
+    public func logRequest(request: FlyRequest, response: FlyResponse) {
         App.log("\(request.method) \(request.path) -> \(response.status.description)")
     }
 
-    static var logDirectory: String { return "log" }
+    public static var logDirectory: String { return "log" }
 }
 
 public protocol FlyServer {
