@@ -34,7 +34,7 @@ public struct HTTPRoute: RequestHandler, HTTPRoutable {
 }
 
 public protocol HTTPRoutable {
-    public init(path: String, method: HTTPMethod, action: FlyAction)
+    init(path: String, method: HTTPMethod, action: FlyAction)
 }
 
 public extension Router where Route: HTTPRoutable {
@@ -50,7 +50,7 @@ public extension Router where Route: HTTPRoutable {
 
 
 public protocol HTMLPrintableRoute {
-    public var htmlString: String { get }
+    var htmlString: String { get }
 }
 
 public extension Router: SwifTML { }
