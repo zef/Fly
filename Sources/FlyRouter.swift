@@ -55,12 +55,12 @@ public extension Router where Route: HTTPRoutable {
 }
 
 
-protocol HTMLPrintableRoute {
+public protocol HTMLPrintableRoute {
     var htmlString: String { get }
 }
 
 extension Router: SwifTML { }
-extension Router where Route: HTMLPrintableRoute {
+public extension Router where Route: HTMLPrintableRoute {
 
     var HTMLRouteList: String {
         return HTML5(head: [], body: [
